@@ -1,0 +1,65 @@
+service: applied-paranoia-com
+
+plugins:
+  - serverless-s3-sync
+custom: 
+  siteName: ${self:custom.zoneName.${opt:stage, 'dev'}, "${self:custom.zoneName.default}"}
+  zoneName:
+    prod: applied-paranoia.com
+    default: ${opt:stage, 'dev'}.applied-paranoia.com
+  hostedZoneName: applied-paranoia.com
+  aliasHostedZoneId: Z3AQBSTGFYJSTF    # us-east-1
+  aliasDNSName: s3-website-us-east-1.amazonaws.com
+  s3Sync:
+    - bucketName: ${self:custom.siteName}
+      localDir: _site
+
+# No need to edit below here
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+resources:
+  Resources:
+    StaticSite:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.siteName}
+        AccessControl: PublicRead
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+    StaticSiteS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: StaticSite
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+              - s3:GetObject
+              Resource:
+                Fn::Join: [
+                  "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "StaticSite"
+                    },
+                    "/*"
+                  ]
+                ]
+    DnsRecord:
+      Type: "AWS::Route53::RecordSet"
+      Properties:
+        AliasTarget:
+          DNSName: ${self:custom.aliasDNSName}
+          HostedZoneId: ${self:custom.aliasHostedZoneId}
+        HostedZoneName: ${self:custom.hostedZoneName}.
+        Name:
+          Ref: StaticSite
+        Type: 'A'
+

@@ -3,3 +3,6 @@ _site
 .jekyll-cache
 .jekyll-metadata
 vendor
+.serverless/
+node_modules/
+package-lock.json

@@ -1,0 +1,9 @@
+{
+  "name": "applied-paranoia.com",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-s3-sync": "^1.17.1"
+  }
+}
