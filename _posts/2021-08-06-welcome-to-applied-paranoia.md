@@ -2,7 +2,6 @@
 layout: post
 title:  "Welcome to Applied Paranoia!"
 date:   2021-08-06
-categories: blog, supply-chain security, cstf, dnp3
 ---
 I found myself saying this for the second time today: "Cybersecurity is applied paranoia". Hardly the first time I said it, but twice in the same day is still rare.
 
