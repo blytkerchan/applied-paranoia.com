@@ -1,8 +1,0 @@
-{
-  "name": "serverless-jekyll-site-plugin",
-  "version": "1.0.0",
-  "description": "A plugin to simplify deploying a Jekyll site to S3 and CloudFront",
-  "author": "Ronald Landheer-Cieslak, with code from nikgraf",
-  "license": "MIT"
-}
-
