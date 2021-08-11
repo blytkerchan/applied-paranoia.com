@@ -57,16 +57,16 @@ resources:
                     "/*"
                   ]
                 ]
-    #StaticSiteDnsRecord:
-    #  Type: "AWS::Route53::RecordSet"
-    #  Properties:
-    #    AliasTarget:
-    #      DNSName:
-    #        Fn::GetAtt: [ StaticSiteCloudFrontDistribution, DomainName ]
-    #      HostedZoneId: ${self:custom.cloudFrontHostedZoneId}
-    #    HostedZoneName: ${self:custom.hostedZoneName}.
-    #    Name: ${self:custom.siteName}
-    #    Type: 'A'
+    StaticSiteDnsRecord:
+      Type: "AWS::Route53::RecordSet"
+      Properties:
+        AliasTarget:
+          DNSName:
+            Fn::GetAtt: [ StaticSiteCloudFrontDistribution, DomainName ]
+          HostedZoneId: ${self:custom.cloudFrontHostedZoneId}
+        HostedZoneName: ${self:custom.hostedZoneName}.
+        Name: ${self:custom.siteName}
+        Type: 'A'
     StaticSiteCloudFrontDistribution:
       Type: AWS::CloudFront::Distribution
       Properties:
@@ -102,15 +102,7 @@ resources:
                 Forward: none
             ViewerProtocolPolicy: redirect-to-https
           ViewerCertificate:
-            AcmCertificateArn: 'arn:aws:acm:us-east-1:981855120431:certificate/a62c02d0-b1d5-445a-84eb-ed5f5a07ae09'
+            AcmCertificateArn: 'arn:aws:acm:us-east-1:981855120431:certificate/58d98960-42ee-47de-81de-d36623c86a8a'
             MinimumProtocolVersion: TLSv1.2_2018
             SslSupportMethod: sni-only
-
-#functions:
-#  handleIndex:
-#    handler: functions/handle-index/index.handler
-#    events:
-#      - cloudFront:
-#          eventType: origin-request
-#          origin: s3://${self:custom.siteName}.s3.amazonaws.com
 

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: About
-permalink: /about/
+permalink: /about/index.html
 ---
 
 <img src="{{ site.baseimg }}/assets/img/ronald.png" alt="Ronald" style="float: right" />
