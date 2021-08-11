@@ -57,16 +57,16 @@ resources:
                     "/*"
                   ]
                 ]
-    StaticSiteDnsRecord:
-      Type: "AWS::Route53::RecordSet"
-      Properties:
-        AliasTarget:
-          DNSName:
-            Fn::GetAtt: [ StaticSiteCloudFrontDistribution, DomainName ]
-          HostedZoneId: ${self:custom.cloudFrontHostedZoneId}
-        HostedZoneName: ${self:custom.hostedZoneName}.
-        Name: ${self:custom.siteName}
-        Type: 'A'
+    #StaticSiteDnsRecord:
+    #  Type: "AWS::Route53::RecordSet"
+    #  Properties:
+    #    AliasTarget:
+    #      DNSName:
+    #        Fn::GetAtt: [ StaticSiteCloudFrontDistribution, DomainName ]
+    #      HostedZoneId: ${self:custom.cloudFrontHostedZoneId}
+    #    HostedZoneName: ${self:custom.hostedZoneName}.
+    #    Name: ${self:custom.siteName}
+    #    Type: 'A'
     StaticSiteCloudFrontDistribution:
       Type: AWS::CloudFront::Distribution
       Properties:
@@ -106,12 +106,11 @@ resources:
             MinimumProtocolVersion: TLSv1.2_2018
             SslSupportMethod: sni-only
 
-functions:
-  handleIndex:
-    handler: functions/handle-index/index.handler
-    events:
-      - cloudFront:
-          eventType: origin-request
-          origin: s3://${self:custom.siteName}.s3.amazonaws.com
-
+#functions:
+#  handleIndex:
+#    handler: functions/handle-index/index.handler
+#    events:
+#      - cloudFront:
+#          eventType: origin-request
+#          origin: s3://${self:custom.siteName}.s3.amazonaws.com
 
