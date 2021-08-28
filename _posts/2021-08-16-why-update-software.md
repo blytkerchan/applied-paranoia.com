@@ -1,4 +1,5 @@
 ---
+author: rlc
 layout: post
 title:  "Why update your firmware and software?"
 date:   2021-08-16
