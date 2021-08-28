@@ -24,14 +24,9 @@ The only way to not write buggy code is to not write code at all. This is true r
 
 So why are security bugs in Open Source software popping up left and right? I see two reasons for that: 
 
-
 	
   1. Open Source software is getting more popular
-
-	
   2. Open Source software is Open Source software
-
-
 
 Open Source software is embedded in your telephone, used by banks, governments and the military, and most businesses around the world. It is the very definition of ubiquitous. The size of open source projects ranges from huge (Linux kernel, for example) to tiny ([Github's "gists"](https://gist.github.com/discover), for example) and their quality is equally on the complete range (great to extremely poor).
 
@@ -40,77 +35,15 @@ In recent years, with the advent of the Internet and with Open Source code becom
 The fact that Open Source software is Open Source software means that if problems are found in the software, those problems are not hidden.
 
 Let's have a look at all unknown vulnerabilities with unknown impacts and/or unknown attack vectors in 2014 so far (there aren't that many): 
-      <table >
-         CVE entries for unknown vulnerabilities with unknown impacts and/or unknown attack vectors in 2014
-         
-            <tr >
-               CVE ID
-               Description
-            </tr>
-         
-         <tbody >
-            <tr >
-               
-<td width="150" >
-                  [CVE-2014-0462](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0462)
-               
-</td>
-               
-<td >Unspecified vulnerability in OpenJDK 6 before 6b31 on Debian GNU/Linux and Ubuntu 12.04 LTS and 10.04 LTS has unknown impact and attack vectors, a different vulnerability than CVE-2014-2405.
-</td>
-            </tr>
-            <tr >
-               
-<td width="150" >
-                  [CVE-2014-1961](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-1961)
-               
-</td>
-               
-<td >Unspecified vulnerability in the Portal WebDynPro in SAP NetWeaver allows remote attackers to obtain sensitive path information via unknown attack vectors.
-</td>
-            </tr>
-            <tr >
-               
-<td width="150" >
-                  [CVE-2014-2405](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-2405)
-               
-</td>
-               
-<td >Unspecified vulnerability in OpenJDK 6 before 6b31 on Debian GNU/Linux and Ubuntu 12.04 LTS and 10.04 LTS has unknown impact and attack vectors, a different vulnerability than CVE-2014-0462.
-</td>
-            </tr>
-            <tr >
-               
-<td width="150" >
-                  [CVE-2014-2657](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-2657)
-               
-</td>
-               
-<td >Unspecified vulnerability in the print release functionality in PaperCut MF before 14.1 (Build 26983) has unknown impact and remote vectors, related to embedded MFPs.
-</td>
-            </tr>
-            <tr >
-               
-<td width="150" >
-                  [CVE-2014-2881](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-2881)
-               
-</td>
-               
-<td >Unspecified vulnerability in the Diffie-Hellman key agreement implementation in the management GUI Java applet in Citrix NetScaler Application Delivery Controller (ADC) and NetScaler Gateway before 9.3-66.5 and 10.x before 10.1-122.17 has unknown impact and vectors.
-</td>
-            </tr>
-            <tr >
-               
-<td width="150" >
-                  [CVE-2014-4648](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-4648)
-               
-</td>
-               
-<td >Unspecified vulnerability in Piwigo before 2.6.3 has unknown impact and attack vectors, related to a "security failure."
-</td>
-            </tr>
-         </tbody>
-      </table>
+
+| CVE ID | Description |
+| ------ | ----------- |
+| [CVE-2014-0462](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0462) | Unspecified vulnerability in OpenJDK 6 before 6b31 on Debian GNU/Linux and Ubuntu 12.04 LTS and 10.04 LTS has unknown impact and attack vectors, a different vulnerability than CVE-2014-2405. |
+| [CVE-2014-1961](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-1961) | Unspecified vulnerability in the Portal WebDynPro in SAP NetWeaver allows remote attackers to obtain sensitive path information via unknown attack vectors. |
+| [CVE-2014-2405](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-2405) | Unspecified vulnerability in OpenJDK 6 before 6b31 on Debian GNU/Linux and Ubuntu 12.04 LTS and 10.04 LTS has unknown impact and attack vectors, a different vulnerability than CVE-2014-0462. |
+| [CVE-2014-2657](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-2657) | Unspecified vulnerability in the print release functionality in PaperCut MF before 14.1 (Build 26983) has unknown impact and remote vectors, related to embedded MFPs. |
+| [CVE-2014-2881](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-2881) | Unspecified vulnerability in the Diffie-Hellman key agreement implementation in the management GUI Java applet in Citrix NetScaler Application Delivery Controller (ADC) and NetScaler Gateway before 9.3-66.5 and 10.x before 10.1-122.17 has unknown impact and vectors. |
+| [CVE-2014-4648](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-4648) | Unspecified vulnerability in Piwigo before 2.6.3 has unknown impact and attack vectors, related to a "security failure." |
 
 Two of these are in open source projects (actually, both are in OpenJDK). The other four are in proprietary software.
 If we expand the list to include anything that is an unspecified vulnerability, there are 205, 27 of which are in Open Source software.
