@@ -1,11 +1,11 @@
 ---
 author: rlc
 comments: true
-date: 2021-12-24
+date: 2021-12-29
 layout: post
 title: Getting rid of Java - without getting rid of Java code
 ---
-In my previous post on applied-paranoia.com, I concluded that one of the lessons learned from the log4j debacle was that we should get rid of public-facing interfaces (UI and API) based on Java technologies. How do we do that, without also getting rid of the thousands upon thousands of lines of Java code, IP, and “sunk” investment? Clearly, just deleting the code and re-writing it all in some other language is not an option!
+In my [previous post here on applied-paranoia.com](https://applied-paranoia.com/2021/12/23/log4j.html), I concluded that one of the lessons learned from the log4j debacle was that we should get rid of public-facing interfaces (UI and API) based on Java technologies. How do we do that, without also getting rid of the thousands upon thousands of lines of Java code, IP, and “sunk” investment? Clearly, just deleting the code and re-writing it all in some other language is not an option!
 <!--more-->
 
 Let’s start with some low-hanging fruit: **don't start any new Java projects**. Java developers can be converted to other, similar languages such as C# with fairly minimal effort and contrary to common belief, C# is just as portable as Java for the vast majority of use-cases. C# also doesn't have some of the cybersecurity issues that Java has been plagued with over the last few decades, in large part because it has had the opportunity to learn from Java, and from Windows, in that respect. If there is a choice for programming languages, *Java should only be used if no other options are available* for new projects.
@@ -80,7 +80,40 @@ For this to *actually* work, though, you need a bit more than just signing all y
 6. you need to test the deployment configuration (preferably regularly) for its inability to run badly signed, or unsigned, JARs
 7. you need to make sure you re-deploy your entire application before the certificates you use to sign them expire (so likely at least once a year)
 
+Some of these, like setting up your PKI, would be worth their own post, but I'll just go through each in a single paragraph to explain what I mean and why it's important.
 
+Setting up a PKI is the first step: you need to be sure that what you trust is indicated as such, and to do that you need to authenticate it. Setting up a PKI does not have to be expensive, but you do need to know what you're doing and you need to keep your root CA certificate safe. In this case, you *should not* use a commercial CA unless you root your trust in an intermediate CA certificate that you create yourself: using a commercial CA means that anyone who can pay the fee can get a trusted certificate -- not what you want. There are quite a few caveats to consider here, but without a PKI you can't implement code signing effectively. It's just that simple.
+
+Once you have a PKI in place you need to be sure about what you're signing, which means auditing the code. Some of that can be done automatically: you can, for example, use a static analyzer to analyze all the third-party open source code. If you fix the issues you find (which you generally should) you should contribute the fixes back upstream: it's the right thing to do as a netizen, and it means you don't have to maintain the patches afterwards. Remember to use responsible disclosure if you find security issues in third party code.
+
+Once you've audited your application, you should re-package it into signed JAR files, using only the trusted dependencies that you have now audited. That's just how code signing works in Java.
+
+Once you've done that, you need to configure your deployment to run only signed JAR files. There's plenty of documentation on how to do this, so it shouldn't be too hard, dependending on how your deployment works. This should be part of your CI/CD as well.
+
+Make sure the deployment configuration is version controlled: you want to make sure you can audit any changes that were made to the configuration, and you want to make sure that, just like your code should have, you have a review and approval process in place that explicitly looks for cybersecurity issues. For any change made to the configuration, you need to be able to show why it was done, when it was done, by whom it was done, and what the change was.
+
+Also make sure you (periodically) test that you really can't run unsigned JARs or JARs signed using some other CA: a large part of your security depends on this, so the risk associated with failure is high (the likelihood of things going wrong is high, and so is the impact).
+
+Finally, depending on your PKI expiry policies, you will need to re-deploy the entire application on a regular basis to refresh the certificates being used. This generally means that if you redeploy your application anyway, say on a monthly basis, you don't have anything special to do other than monitor the age of your oldest deployment. Make sure this works, because your application *will* stop working if you forget!
 
 ### Proxy
+To prevent the JVM from unexpectedly reaching out to the internet, the application should be behind a proxy.
+
+Proxies are what IT in big companies use to eavesdrop on their staff's use of the Internet. Like you shouldn't trust the JVM, IT doesn't trust non-IT staff, so internet usage is monitored for anything illegal, inappropriate, or unsafe for company IP and infrastructure.
+
+While we don't expect the JVM to download videos of cute cats or to spontaneously buy illegal firearms, we do need to make sure that it doesn't connect to any servers on the Internet that aren't on a "white list", and you'll want to scan the contents of the messages being exchanged.
+
+Being able to scan the messages being exchanged usually means the proxy will "spoof" the external site's certificate with its own, which, again, means you need a PKI. Note that this implies that the proxy implements its own CA. It also means its CA certificates *should not* be signed by a commercial trusted root (because doing that would be ***very*** dangerous) and should not be trusted anywhere outside of your organization.
+
+The proxy should basically, at the very least, check that the server being reached out to is on the white list, create a certificate to spoof the target, reach out to the server itself, validate then relay the request, validate then relay the response, and keep validating and relaying requests and responses as long as it passes muster.
+
+Obviously, if your application has no legitimate reason to reach out to the Internet, you don't need a proxy: you just need a firewall (which you need anyway).
+
 ### API Gateways and deep firewalls
+Outgoing traffic is not the only problem, though: ultimately, the issue is that someone from the outside is trying to coerce your application into doing something you don't want it to do. It would be a pretty odd approach to lock your application up in a sandbox without even looking at what's going into the application.
+
+An API Gateway does just that. It's usually used for three things: load balancing, HTTPS-to-HTTP forwarding (so your application code doesn't have to deal with HTTPS), and deep inspection. We're interested in the deep inspection in this case.
+
+OWASP, the Open Web Application Security Project, has a set of "core rules" that you can find at [coreruleset.org](https://coreruleset.org/). Implement them. Use ModSecurity if you must (but not it will no longer have commercial support in 2024).
+
+This is probably the hardest part (this and the proxy, really): it will cost the most to implement and maintain, but it is also your first line of defense.
