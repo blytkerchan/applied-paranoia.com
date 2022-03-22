@@ -12,7 +12,7 @@ Responsible disclosure doesn't take the surprise away completely, but softens th
 Responsible disclosure is not easy: it puts a burden on whoever found the vulnerability (who ends up being called a "security researcher" no matter what they do in their day-to-day life) to find the "proper channel", but it also puts a burden on whoever wrote the software in the first place to create that channel. Especially for small vendors, small teams, or open source software volunteers, that can be quite a burden.
 
 ## The sorry state of responsible disclosure in Canada
-Some countries, like the US, have government agencies to take on some of the burden off the security researchers. Canada has no such government organization, as [shown by the Cybersecure Policy Exchange](https://www.cybersecurepolicy.ca/vulnerability-disclosure), a cybersecurity lobbying organization funded by RBC and run from Ryerson University in Toronto. As they point out:
+Some countries, like the US, have government agencies to take on some of the burden of the security researchers. Canada has no such government organization, as [shown by the Cybersecure Policy Exchange](https://www.cybersecurepolicy.ca/vulnerability-disclosure), a cybersecurity lobbying organization funded by RBC and run from Ryerson University in Toronto. As they point out:
 
 * Canada does not have a "distinct and clear disclosure process for vulnerabilities involving government systems"
 * Canada does not "[describe] the vulnerability submission and verification process"
@@ -24,7 +24,7 @@ Our neighbour to the South, as well as the European Union, Japan, Russia, and Gr
 
 It's rather saddening to see that my adopted country is lagging behind, but this post is not about Canada.
 
-A "distinct and clear disclosure process" would lighten the load on "security researchers" a bit: it allows them to contact a single (government) agency that can then coordinate with affected vendors, businesses and government services to ensure resolution of the issue and careful dissemination of relevant information. For example, the security researcher, or the affected vendor or open source project, does not have to try to find out who is affected by the vulnerability if there's a government agency that is dedicated to doing that. Pro-actively reaching out to critical infrastructure providers (i.e. privately owned utilities for the power network, water and waste water, telephony, etc.) to get an inventory of potentially-vulnerable (that is: all) software used in critical systems or have them maintain such an inventory in case there's a vulnerability to be dealt with is a job better suited for a government agency than for dozens of small teams.
+A "distinct and clear disclosure process" would lighten the load on security researchers a bit: it allows them to contact a single (government) agency that can then coordinate with affected vendors, businesses and government services to ensure resolution of the issue and careful dissemination of relevant information. For example, the security researcher, or the affected vendor or open source project, does not have to try to find out who is affected by the vulnerability if there's a government agency that is dedicated to doing that. Pro-actively reaching out to critical infrastructure providers (i.e. privately owned utilities for the power network, water and waste water, telephony, etc.) to get an inventory of potentially-vulnerable (that is: all) software used in critical systems or have them maintain such an inventory in case there's a vulnerability to be dealt with is a job better suited for a government agency than for dozens of small teams.
 
 So, absent government support, who does a security researcher contact?
 
@@ -66,6 +66,4 @@ If there is any kind of team or community to speak of for the project, any issue
 Even if that is the case, a fix will eventually be published in source code, by being pushed to a git repo or even just published as a tarball. Most open source projects publish source code, and may or may not publish binaries. Again, it is easy to monitor such releases and black hat hackers generally will do just that. While the commit message may not refer to a CVE number directly, it will still generally describe something like "fix a race condition that could occur if ...", which may be enough to understand that a vulnerability is being addressed. Such changes may fix the issue, but will also expose it to knowledgeable onlookers, who may then exploit deployments that haven't been updated yet.
 
 Once the fix has been published, open source projects don't necessarily know who uses their software, so it becomes difficult to discreetly contact stakeholders to have them update their software without making the vulnerability public. That means that stakeholders have no choice but to learn about the vulnerability at the same time (or after) the "bad guys" do as well.
-
-I will cover vulnerability management plans in my next post.
 
