@@ -1,16 +1,25 @@
 version: 0.2
 env:
     shell: bash
+    secrets-manager:
+        AWS_ACCESS_KEY_ID: "cloudformationkeys:AWS_ACCESS_KEY_ID"
+        AWS_SECRET_ACCESS_KEY: "cloudformationkeys:AWS_SECRET_ACCESS_KEY"
+
 phases:
     install:
         ruby: 2.7
-        # nodejs: 12.x
+        nodejs: 12.x
     pre_build:
         commands:
             - "bundle install"
+            - "npm i -g serverless"
+            - "serverless plugin install -n serverless-s3-sync"
     build:
         commands:
             - "bundle exec jekyll build"
+    post_build:
+        commands:
+            - "serverless deploy -v -s prod"
 artifacts:
     files:
         - "**/*"
