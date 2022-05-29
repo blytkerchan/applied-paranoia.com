@@ -1,0 +1,17 @@
+version: 0.2
+env:
+    shell: bash
+phases:
+    install:
+        ruby: 2.7
+        # nodejs: 12.x
+    pre_build:
+        commands:
+            - "bundle install"
+    build:
+        commands:
+            - "bundle exec jekyll build"
+artifacts:
+    files:
+        - "**/*"
+    base-directory: "_site"
