@@ -19,7 +19,7 @@ phases:
             - "bundle exec jekyll build"
     post_build:
         commands:
-            - "serverless deploy -v -s prod"
+            - "serverless deploy -s prod"
 artifacts:
     files:
         - "**/*"

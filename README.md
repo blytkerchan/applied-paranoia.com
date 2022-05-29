@@ -35,7 +35,7 @@ export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Once that's done, you can do
 ```
 bundle exec jekyll build
-serverless deploy -v -s prod
+serverless deploy -s prod
 ```
 to deploy the website to prod (vlinder.ca).
 To deploy to dev, use `serverless deploy -v`, (to dev.vlinder.ca)
