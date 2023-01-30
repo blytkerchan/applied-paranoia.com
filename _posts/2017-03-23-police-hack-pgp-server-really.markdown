@@ -1,23 +1,48 @@
 ---
 author: rlc
+comments: true
 date: 2017-03-23 22:19:45+00:00
 layout: post
+permalink: /blog/2017/03/police-hack-pgp-server-really/
+slug: police-hack-pgp-server-really
 title: '"Police hack PGP server" -- really?'
+wordpress_id: 4162
+categories:
+- Computers and Society
+- In the news
+- Interesting stuff
+- Opinions
+tags:
+- encryption
+- in the news
+- PGP
+- police
+- privacy
+- security
+- The Netherlands
 ---
-***This post was originally published on [my general-purpose blog](https://rlc.vlinder.ca/blog/2017/03/police-hack-pgp-server-really/) and has not been updated***
 
 This afternoon, this headline caught my attention: "[Police hack PGP server with 3.6 million messages from organized crime BlackBerrys](http://www.zdnet.com/article/police-hack-pgp-server-with-3-6-million-messages-from-organized-crime-blackberrys/)". When I read it, I thought: "either the journalist/title writer got it wrong, or PGP is broken".
 <!--more-->
+
 There are a few things that struck me as odd in the title:
+
+
+
 
   1. a "PGP server" usually contains a list of public keys, not messages. There is no reason for police to hack such a server: they can just download the keys
 
+
   2. if the police did have a reason to hack a server, it would have been to retrieve and decrypt PGP-encrypted messages, but that is nearly impossible without the associated private keys
+
 
 So, I started reading the article. It states a few things. TLDR: 
   * It affirms that "Dutch police say they've managed to crack data held on a private server protected by end-to-end encryption" -- I have found some Dutch news outlets that say the same thing, but I haven't found a Dutch police press release and no-one seemed to link to one.
 
+
   * "Toronto police seized Ennetcom's main server last year and presented a copy of it to the Dutch police in September 2016.". The seizure was done pursuant to a search warrant requested by the Dutch police and granted and executed to the Canadian (Toronto) police, as noted in the decision referenced by ZDNet (which is the [September order](https://www.canlii.org/en/on/onsc/doc/2016/2016onsc5699/2016onsc5699.html))
+
+
 
 The article goes on to protect the reputation of the Dutch as freedom-loving and not generally going about hacking other people's servers.
 
@@ -27,9 +52,15 @@ The _technical_ issue here is therefore that private PGP keys were held in escro
 
 This shows two things, in my opinion:
 
+
+
+
   1. you shouldn't roll your own security schemes (or alter existing security schemes when adopting them) if you can help it
 
+
   2. if there's a flaw in your security scheme (in this case: holding private keys in escrow) your adversaries (in this case: law enforcement) will find and exploit it
+
+
 
 Also: Dutch police know what they're doing.
 

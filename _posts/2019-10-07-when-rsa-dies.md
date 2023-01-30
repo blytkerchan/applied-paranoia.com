@@ -1,13 +1,13 @@
 ---
 author: rlc
+comments: true
 date: 2019-10-07 12:32:00-04:00
 layout: post
+slug: when-rsa-dies
 title: When RSA dies
 ---
-***This post was originally published on [my general-purpose blog](https://rlc.vlinder.ca/blog/2019/10/07/when-rsa-dies) and has not been updated***
-
 {% include shadowbox.html text="<b>The TL;DR:</b>" open_only=true %}
-<p>In this post I explain, as best I can:
+<p>Below, I explain (as best I can):
 <ul>
 <li>why the end of RSA is nigh</li>
 <li>why ephemeral Diffie-Hellman will survive</li>
