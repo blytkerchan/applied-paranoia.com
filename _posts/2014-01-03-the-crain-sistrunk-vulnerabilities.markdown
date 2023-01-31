@@ -4,6 +4,7 @@ date: 2014-01-03 00:25:38+00:00
 layout: post
 title: The Crain-Sistrunk vulnerabilities
 ---
+***This post was originally published on [my general-purpose blog](https://rlc.vlinder.ca/blog/2014/01/the-crain-sistrunk-vulnerabilities/) and has not been updated***
 
 In the two previous posts, I've shown that industrial control systems -- ICSs -- [are becoming more pervasive](http://rlc.vlinder.ca/blog/2013/12/the-importance-of-ics-security-pervasiveness-of-icss/), and that they [rely on security through obscurity](http://rlc.vlinder.ca/blog/2013/12/the-importance-of-ics-security-ics-communications/).
 
@@ -13,7 +14,7 @@ Now, let's make the link with current events.
 
 This is where the Crain-Sistrunk vulnerabilities come in: Adam Crain and Chris Sistrunk have discovered vulnerabilities in the vast majority of ICSs that implement DNP3.
 
-The relevance of these vulnerabilities, which are documented as part of [Project Robus](http://www.automatak.com/robus/), is in the fact that they have exposed three things that were not known (or acknowledged) before: 
+The relevance of these vulnerabilities, which are documented as part of [Project Robus](https://web.archive.org/web/20141117212310/http://automatak.com/robus/), is in the fact that they have exposed three things that were not known (or acknowledged) before: 
 
   1. serial communications are a viable attack vector to knock out a master device
   2. the vast majority of devices implementing DNP3 are vulnerable to attack, _regardless of whether they implement DNP3 Secure Authentication_
@@ -28,13 +29,13 @@ Let's look at these three points, one by one:
 
 Industry standards generally focus on TCP/IP communications for as far as they are concerned with security. In the context of smart grids, the [NERC (North American Electric Reliability Corporation) Critical Infrastructure Protection](http://web.archive.org/web/20151019112638/http://www.nerc.com/pa/Stand/Pages/CIPStandards.aspx) standards are a good example: CIP-005-3a, the electronic security perimeter standard, includes dial-up and non-routable protocols as entry points to the electronic perimeter (section B, requirement R1.1) but electronic access control is only required "where technically feasible" and only if access is interactive: 
 
-<blockquote>**CIP-005-3a. Section B. Requirement R2.4**: Where external interactive access into the Electronic Security Perimeter has been enabled, the Responsible Entity shall implement strong procedural or technical controls at the access points to ensure authenticity of the accessing party, where technically feasible.</blockquote>
+<blockquote><b>CIP-005-3a. Section B. Requirement R2.4</b>: Where external interactive access into the Electronic Security Perimeter has been enabled, the Responsible Entity shall implement strong procedural or technical controls at the access points to ensure authenticity of the accessing party, where technically feasible.</blockquote>
 
 
 
 Monitoring electronic access is for dial-up and non-routable protocols is only required where technically feasible as well: 
 
-<blockquote>**CIP-005-3a. Section B. Requirement R3.1**For dial-up accessible Critical Cyber Assets that use non-routable protocols, the Responsible Entity shall implement and document monitoring process(es) at each access point to the dial-up device, where technically feasible.</blockquote>
+<blockquote><b>CIP-005-3a. Section B. Requirement R3.1</b> For dial-up accessible Critical Cyber Assets that use non-routable protocols, the Responsible Entity shall implement and document monitoring process(es) at each access point to the dial-up device, where technically feasible.</blockquote>
 
 
 
