@@ -12,6 +12,7 @@ categories:
 tags:
 - Posts that need to be re-tagged (WIP)
 ---
+***This post was originally published on [my general-purpose blog](https://rlc.vlinder.ca/blog/2009/09/security-at-the-design-phase-examples-review/) and has not been updated***
 
 A [recent report from the SEI](http://www.sei.cmu.edu/library/abstracts/reports/09tr010.cfm) confirms once more what I have been saying for a few years now: security is a design-time concern as much as it is a concern at any other time during the application life-cycle. The very architecture of the application should take security into account from the outset, and that concern should be followed through down to implementation and deployment.
 <!--more-->

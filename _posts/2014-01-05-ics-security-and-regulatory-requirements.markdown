@@ -16,6 +16,7 @@ tags:
 - regulatory requirements
 - requirements
 ---
+***This post was originally published on [my general-purpose blog](https://rlc.vlinder.ca/blog/2014/01/ics-security-and-regulatory-requirements/) and has not been updated***
 
 In North America, ICS security, as regards the electricity grid, is regulated by [NERC](http://www.nerc.com/), which provides and enforces, among other things, the Critical Infrastructure Protection (CIP) standards.
 

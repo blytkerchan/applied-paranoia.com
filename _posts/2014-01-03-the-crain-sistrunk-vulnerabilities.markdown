@@ -15,6 +15,7 @@ tags:
 - DNP3
 - ICS security
 ---
+***This post was originally published on [my general-purpose blog](https://rlc.vlinder.ca/blog/2014/01/the-crain-sistrunk-vulnerabilities/) and has not been updated***
 
 In the two previous posts, I've shown that industrial control systems -- ICSs -- [are becoming more pervasive](/blog/2013/12/the-importance-of-ics-security-pervasiveness-of-icss/), and that they [rely on security through obscurity](/blog/2013/12/the-importance-of-ics-security-ics-communications/).
 

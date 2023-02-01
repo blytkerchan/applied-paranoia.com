@@ -7,10 +7,11 @@ env:
 
 phases:
     install:
-        ruby: 2.7
+        ruby: 2.7.4
         nodejs: 12.x
     pre_build:
         commands:
+            - "gem update"
             - "bundle install"
             - "npm i -g serverless"
             - "serverless plugin install -n serverless-s3-sync"
