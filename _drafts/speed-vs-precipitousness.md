@@ -1,0 +1,5 @@
+In one of my first jobs, I was responsible for the development and deployment of a data management and code generation system that could be called into from consumer embedded devices to do things like handle small transactions. I was working for a small start-up at the time and, until they went out of business, it was a lot of fun.
+
+One of the things the Marketing Director of that small company often told me — and anyone who would listen to him — was to avoid confusing speed with precipitousness: "Il ne faut pas confondre la vitesse et la précipitation," he used to say. My French was a bit uncertain at the time, but his words stuck with me nonetheless, and I went about my business with deliberate speed.
+
+<!-- my notes use the example of part 5 - I should find another example that won't piss so many people off -->
