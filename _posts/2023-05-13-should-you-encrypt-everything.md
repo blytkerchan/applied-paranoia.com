@@ -1,7 +1,7 @@
 ---
 author: rlc
 comments: true
-date: 2022-09-30
+date: 2023-05-13
 layout: post
 title: Should you encrypt everything?
 ---
