@@ -1,4 +1,8 @@
-To build the site, you need a recent version of Ruby, and a recent version of Bundle installed within that. Assuming you have that (if you don't check out jekyllrb.com to see how to set up), do the following after cloning to set up the site. Note that the rubygems site doesn't work with IPv6, but advertises that it does, so you need to disable IPv6 for this to work.
+To build the site, you need a recent version of Ruby, and a recent version of Bundle installed within 
+That. Assuming you have that (if you don't check out jekyllrb.com to see how to set up), do the
+following after cloning to set up the site.
+Note that the rubygems site doesn't work with IPv6, but advertises that it does, so you need to disable
+IPv6 for this to work.
 
 ```
 bundle install
