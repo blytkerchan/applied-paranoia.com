@@ -14,3 +14,4 @@ infra/env.auto.tfvars
 infra/*.tfstate
 infra/*.tfstate.*
 infra/.terraform/
+infra/plan.tfplan

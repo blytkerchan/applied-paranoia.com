@@ -68,9 +68,13 @@ if [[ ! -f backend.tfvars ]]; then
 bucket       = "$AWS_STATE_BUCKET"
 key          = "$AWS_STATE_KEY"
 region       = "$AWS_REGION"
-use_lockfile = true
 EOF
   echo "Generated backend.tfvars"
+fi
+
+if grep -q '^use_lockfile' backend.tfvars; then
+  sed -i '/^use_lockfile/d' backend.tfvars
+  echo "Updated backend.tfvars: removed unsupported use_lockfile for S3 backend"
 fi
 
 cat > env.auto.tfvars << EOF
@@ -87,7 +91,11 @@ fi
 
 echo "Generated env.auto.tfvars"
 
-terraform init -backend-config=backend.tfvars -reconfigure -upgrade
+if ! terraform init -backend-config=backend.tfvars -reconfigure -upgrade; then
+  echo ""
+  echo "ERROR: terraform init failed. Fix the issue above and rerun . bootstrap"
+  return 1
+fi
 
 echo ""
 echo "Bootstrap complete. You can now run:"
