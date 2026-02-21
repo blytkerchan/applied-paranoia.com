@@ -15,4 +15,6 @@ DEPLOYMENT_STAGE=prod
 
 # Optional Terraform overrides
 ROOT_DOMAIN=applied-paranoia.com
+
+# Required for CloudFront custom domain TLS (must be in us-east-1)
 ACM_CERTIFICATE_ARN=

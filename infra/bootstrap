@@ -44,6 +44,7 @@ required_vars=(
   AWS_STATE_BUCKET
   AWS_STATE_KEY
   DEPLOYMENT_STAGE
+  ACM_CERTIFICATE_ARN
 )
 
 for var in "${required_vars[@]}"; do
@@ -75,17 +76,12 @@ fi
 cat > env.auto.tfvars << EOF
 aws_region = "$AWS_REGION"
 stage      = "$DEPLOYMENT_STAGE"
+acm_certificate_arn = "$ACM_CERTIFICATE_ARN"
 EOF
 
 if [[ -n "${ROOT_DOMAIN:-}" ]]; then
   cat >> env.auto.tfvars << EOF
 root_domain = "$ROOT_DOMAIN"
-EOF
-fi
-
-if [[ -n "${ACM_CERTIFICATE_ARN:-}" ]]; then
-  cat >> env.auto.tfvars << EOF
-acm_certificate_arn = "$ACM_CERTIFICATE_ARN"
 EOF
 fi
 

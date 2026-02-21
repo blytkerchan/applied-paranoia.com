@@ -26,7 +26,7 @@ cd infra
 cp dot-env .env
 ```
 
-2. Edit `.env` with your AWS credentials and deployment values.
+2. Edit `.env` with your AWS credentials and deployment values (`ACM_CERTIFICATE_ARN` is required).
 
 3. Initialize state storage (required first step):
 
