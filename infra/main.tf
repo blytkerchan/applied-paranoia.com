@@ -8,7 +8,12 @@ data "aws_route53_zone" "root" {
 }
 
 resource "aws_s3_bucket" "site" {
-  bucket = local.site_name
+  bucket        = local.site_name
+  force_destroy = false
+
+  tags = {
+    STAGE = var.stage
+  }
 }
 
 resource "aws_s3_bucket_website_configuration" "site" {
@@ -24,6 +29,8 @@ resource "aws_s3_bucket_website_configuration" "site" {
 }
 
 data "aws_iam_policy_document" "site_public_read" {
+  version = "2008-10-17"
+
   statement {
     sid       = "PublicReadGetObject"
     effect    = "Allow"
@@ -46,23 +53,25 @@ resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   aliases             = [local.site_name]
   default_root_object = "index.html"
+  is_ipv6_enabled     = true
+  http_version        = "http1.1"
 
   origin {
-    domain_name = aws_s3_bucket_website_configuration.site.website_endpoint
+    domain_name = "${aws_s3_bucket.site.id}.s3.amazonaws.com"
     origin_id   = "StaticSite"
 
     custom_origin_config {
       http_port              = 80
       https_port             = 443
       origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
+      origin_ssl_protocols   = ["SSLv3", "TLSv1"]
     }
   }
 
   default_cache_behavior {
     target_origin_id       = "StaticSite"
     viewer_protocol_policy = "redirect-to-https"
-    compress               = true
+    compress               = false
 
     allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods  = ["GET", "HEAD"]
@@ -80,7 +89,7 @@ resource "aws_cloudfront_distribution" "site" {
     error_code            = 404
     response_code         = 200
     response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
+    error_caching_min_ttl = 300
   }
 
   restrictions {
@@ -93,6 +102,10 @@ resource "aws_cloudfront_distribution" "site" {
     acm_certificate_arn      = var.acm_certificate_arn
     minimum_protocol_version = "TLSv1.2_2018"
     ssl_support_method       = "sni-only"
+  }
+
+  tags = {
+    STAGE = var.stage
   }
 }
 
