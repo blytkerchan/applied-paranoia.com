@@ -1,0 +1,18 @@
+# AWS credentials and region
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+
+# Optional AWS CLI profile name
+AWS_PROFILE=
+
+# Terraform backend state location
+AWS_STATE_BUCKET=
+AWS_STATE_KEY=applied-paranoia/terraform.tfstate
+
+# Deployment settings
+DEPLOYMENT_STAGE=prod
+
+# Optional Terraform overrides
+ROOT_DOMAIN=applied-paranoia.com
+ACM_CERTIFICATE_ARN=

@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# Bootstrap the local Terraform environment for applied-paranoia.com.
+#
+# USAGE: source this script — do NOT execute it directly.
+#   . bootstrap
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo "ERROR: bootstrap must be sourced, not executed directly."
+  echo "  Usage: . bootstrap"
+  exit 1
+fi
+
+if ! command -v terraform >/dev/null 2>&1; then
+  echo "ERROR: terraform not found. Install it and rerun."
+  return 1
+fi
+
+if ! command -v aws >/dev/null 2>&1; then
+  echo "aws CLI not found, installing..."
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update -q && sudo apt-get install -y awscli
+  elif command -v brew >/dev/null 2>&1; then
+    brew install awscli
+  else
+    echo "ERROR: Cannot install aws CLI automatically. Please install it manually."
+    return 1
+  fi
+fi
+
+if [[ ! -f .env ]]; then
+  echo "ERROR: .env file not found."
+  echo "  Copy the template and fill in your values:"
+  echo "    cp dot-env .env"
+  return 1
+fi
+
+# shellcheck source=/dev/null
+. .env
+
+required_vars=(
+  AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY
+  AWS_REGION
+  AWS_STATE_BUCKET
+  AWS_STATE_KEY
+  DEPLOYMENT_STAGE
+)
+
+for var in "${required_vars[@]}"; do
+  if [[ -z "${!var:-}" ]]; then
+    echo "ERROR: Required variable '$var' is not set in .env."
+    return 1
+  fi
+done
+
+aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+aws configure set region "$AWS_REGION"
+aws configure set output json
+
+if [[ -n "${AWS_PROFILE:-}" ]]; then
+  aws configure set profile "$AWS_PROFILE"
+fi
+
+if [[ ! -f backend.tfvars ]]; then
+  cat > backend.tfvars << EOF
+bucket       = "$AWS_STATE_BUCKET"
+key          = "$AWS_STATE_KEY"
+region       = "$AWS_REGION"
+use_lockfile = true
+EOF
+  echo "Generated backend.tfvars"
+fi
+
+cat > env.auto.tfvars << EOF
+aws_region = "$AWS_REGION"
+stage      = "$DEPLOYMENT_STAGE"
+EOF
+
+if [[ -n "${ROOT_DOMAIN:-}" ]]; then
+  cat >> env.auto.tfvars << EOF
+root_domain = "$ROOT_DOMAIN"
+EOF
+fi
+
+if [[ -n "${ACM_CERTIFICATE_ARN:-}" ]]; then
+  cat >> env.auto.tfvars << EOF
+acm_certificate_arn = "$ACM_CERTIFICATE_ARN"
+EOF
+fi
+
+echo "Generated env.auto.tfvars"
+
+terraform init -backend-config=backend.tfvars -reconfigure -upgrade
+
+echo ""
+echo "Bootstrap complete. You can now run:"
+echo "  terraform plan --var-file=env.auto.tfvars --out=plan.tfplan"
+echo "  terraform apply plan.tfplan   # only after reviewing the plan"

@@ -6,3 +6,11 @@ vendor
 .serverless/
 node_modules/
 package-lock.json
+
+# Terraform local artifacts
+infra/.env
+infra/backend.tfvars
+infra/env.auto.tfvars
+infra/*.tfstate
+infra/*.tfstate.*
+infra/.terraform/
