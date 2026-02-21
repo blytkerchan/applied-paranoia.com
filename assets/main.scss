@@ -117,11 +117,6 @@ pre code {
   white-space: nowrap !important;
 }
 
-.highlighter-coderay .CodeRay td.code {
-  overflow-x: visible;
-  width: auto;
-}
-
 .highlighter-coderay .CodeRay td.line-numbers strong {
   font-weight: inherit;
 }
@@ -136,15 +131,6 @@ pre code {
   overflow-x: auto;
   padding: 0.8rem 0.95rem;
   width: max-content;
-  white-space: pre !important;
-  word-break: normal !important;
-  word-wrap: normal !important;
-  overflow-wrap: normal !important;
-}
-
-.highlighter-coderay .CodeRay td.code,
-.highlighter-coderay .CodeRay td.code code,
-.highlighter-coderay .CodeRay td.code span {
   white-space: pre !important;
   word-break: normal !important;
   word-wrap: normal !important;
