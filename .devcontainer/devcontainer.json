@@ -16,7 +16,7 @@
       "version": "1.8.5"
     }
   },
-  "postCreateCommand": "bundle install && npm install",
+  "postCreateCommand": "bundle install",
   "customizations": {
     "vscode": {
       "extensions": [
