@@ -7,11 +7,11 @@ env:
 
 phases:
     install:
-        ruby: 3.3.0
-        nodejs: 20.x
+        runtime-versions:
+            ruby: 3.3
+            nodejs: 20
     pre_build:
         commands:
-            - "gem update"
             - "bundle install"
             - "npm i -g serverless"
             - "serverless plugin install -n serverless-s3-sync"

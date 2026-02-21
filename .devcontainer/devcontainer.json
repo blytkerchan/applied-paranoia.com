@@ -1,0 +1,30 @@
+{
+  "name": "applied-paranoia.com",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/ruby:1": {
+      "version": "3.3"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.8.5"
+    }
+  },
+  "postCreateCommand": "bundle install && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Shopify.ruby-lsp",
+        "hashicorp.terraform",
+        "redhat.vscode-yaml",
+        "GitHub.vscode-github-actions"
+      ]
+    }
+  }
+}
