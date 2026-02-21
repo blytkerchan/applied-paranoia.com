@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "site" {
   aliases             = [local.site_name]
   default_root_object = "index.html"
   is_ipv6_enabled     = true
-  http_version        = "http1.1"
+  http_version        = "http2"
 
   origin {
     domain_name = "${aws_s3_bucket.site.id}.s3.amazonaws.com"
@@ -63,18 +63,18 @@ resource "aws_cloudfront_distribution" "site" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["SSLv3", "TLSv1"]
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
 
   default_cache_behavior {
     target_origin_id       = "StaticSite"
     viewer_protocol_policy = "redirect-to-https"
-    compress               = false
+    compress               = true
 
-    allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods  = ["GET", "HEAD"]
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD", "OPTIONS"]
 
     forwarded_values {
       query_string = false
@@ -100,7 +100,7 @@ resource "aws_cloudfront_distribution" "site" {
 
   viewer_certificate {
     acm_certificate_arn      = var.acm_certificate_arn
-    minimum_protocol_version = "TLSv1.2_2018"
+    minimum_protocol_version = "TLSv1.2_2021"
     ssl_support_method       = "sni-only"
   }
 
