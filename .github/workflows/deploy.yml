@@ -247,22 +247,26 @@ jobs:
             -backend-config="region=${{ vars.AWS_REGION }}" \
             -reconfigure
 
-          if BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null); then
+          STATE_JSON=$(terraform state pull 2>/dev/null || true)
+
+          BUCKET=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.s3_bucket_name.value // empty' 2>/dev/null || true)
+          DIST=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.cloudfront_distribution_id.value // empty' 2>/dev/null || true)
+          DOMAIN=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.site_name.value // empty' 2>/dev/null || true)
+
+          if [[ -n "$BUCKET" ]]; then
             echo "bucket=$BUCKET" >> "$GITHUB_OUTPUT"
           else
             HAS_OUTPUTS=false
           fi
 
-          if DIST=$(terraform output -raw cloudfront_distribution_id 2>/dev/null); then
+          if [[ -n "$DIST" ]]; then
             echo "distribution=$DIST" >> "$GITHUB_OUTPUT"
           else
             HAS_OUTPUTS=false
           fi
 
-          if DOMAIN=$(terraform output -raw site_name 2>/dev/null); then
+          if [[ -n "$DOMAIN" ]]; then
             echo "url=https://$DOMAIN" >> "$GITHUB_OUTPUT"
-          else
-            true
           fi
 
           echo "has_outputs=$HAS_OUTPUTS" >> "$GITHUB_OUTPUT"
