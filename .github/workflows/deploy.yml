@@ -282,6 +282,7 @@ jobs:
           BUCKET=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.s3_bucket_name.value // empty' 2>/dev/null || true)
           DIST=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.cloudfront_distribution_id.value // empty' 2>/dev/null || true)
           DOMAIN=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.site_name.value // empty' 2>/dev/null || true)
+          CF_DOMAIN=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.cloudfront_domain_name.value // empty' 2>/dev/null || true)
 
           if [[ -n "$BUCKET" ]]; then
             echo "bucket=$BUCKET" >> "$GITHUB_OUTPUT"
@@ -297,6 +298,10 @@ jobs:
 
           if [[ -n "$DOMAIN" ]]; then
             echo "url=https://$DOMAIN" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ -n "$CF_DOMAIN" ]]; then
+            echo "cloudfront_url=https://$CF_DOMAIN" >> "$GITHUB_OUTPUT"
           fi
 
           echo "has_outputs=$HAS_OUTPUTS" >> "$GITHUB_OUTPUT"
@@ -339,6 +344,7 @@ jobs:
             echo "- Environment: ${{ needs.resolve-target.outputs.env_name }}"
             echo "- Stage: ${{ needs.check-state.outputs.effective_stage }}"
             echo "- URL: ${{ steps.outputs.outputs.url }}"
+            echo "- CloudFront URL: ${{ steps.outputs.outputs.cloudfront_url }}"
             echo "- Distribution ID: ${{ steps.outputs.outputs.distribution }}"
             echo "- Bucket: ${{ steps.outputs.outputs.bucket }}"
             echo "- Infra changed: ${{ needs.detect-infra.outputs.infra_changed }}"
