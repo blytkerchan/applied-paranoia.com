@@ -31,3 +31,16 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "deps(devcontainer)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # assignees and reviewers omitted
