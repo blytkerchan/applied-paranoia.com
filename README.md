@@ -15,6 +15,8 @@ Build static output:
 bundle exec jekyll build
 ```
 
+Ruby runtime is pinned in `.ruby-version` and GitHub Actions reads that file via `ruby/setup-ruby`.
+
 ## Infrastructure deployment (Terraform)
 
 Infrastructure lives under `infra/` and uses an S3 backend for Terraform state.
@@ -67,7 +69,43 @@ This script:
 - Syncs `_site` to the Terraform-managed site bucket.
 - Invalidates CloudFront and waits for completion.
 
-## TODO
+## GitHub Actions branch workflow
 
-- Add a Dependabot configuration to keep `.devcontainer/` and Ruby dependencies up to date.
+- `build.yml`: runs build + output safety checks on pushes/PRs to `dev` and `prod`.
+- `dependabot-auto-approve.yml`:
+	- Auto-approves Dependabot PRs into `dev` after successful build checks.
+	- Auto-approves Dependabot PRs into `prod` only for semver `minor`/`patch` updates after successful build checks.
+- `deploy.yml`: on push to any branch, maps branch -> stage/environment and deploys if that environment exists.
+- `destroy.yml`: manual workflow-dispatch to destroy a branch deployment (requires typing `DESTROY`; rejects `prod`).
+
+Deploy workflows use GitHub Environments:
+- `dev` for dev deploy/destroy workflows.
+- `prod` for prod deploy workflow.
+
+You can enforce required reviewers, wait timers, and environment-scoped secrets under repository Settings -> Environments.
+
+`deploy.yml` derives deployment target from branch name:
+- `prod` branch -> `prod` stage + `prod` environment.
+- Non-`prod` branches -> branch-slug environment name + deterministic unpredictable stage (`dev-<hash>`).
+- If the expected GitHub Environment does not exist, deployment is skipped.
+
+To enable preview deployment for another branch, create a GitHub Environment named as the branch slug (lowercase, non-alphanumeric converted to `-`).
+
+Terraform apply in CI is branch-gated by path filtering:
+- If `infra/**` changed, workflow runs Terraform plan/apply for that environment first.
+- If infra did not change, workflow skips Terraform apply and only deploys static site content.
+
+### Required GitHub repository variables/secrets
+
+Repository variables (`Settings -> Secrets and variables -> Actions -> Variables`):
+- `AWS_ACCESS_KEY_ID`
+- `AWS_REGION`
+- `AWS_STATE_BUCKET`
+- `AWS_STATE_KEY_PROD`
+- `AWS_STATE_KEY_DEV`
+- `ROOT_DOMAIN`
+- `ACM_CERTIFICATE_ARN`
+
+Repository secret:
+- `AWS_SECRET_ACCESS_KEY`
 
