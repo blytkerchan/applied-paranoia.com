@@ -71,11 +71,10 @@ This script:
 
 ## GitHub Actions branch workflow
 
-- `build.yml`: runs build + output safety checks on pushes/PRs to `dev` and `prod`.
 - `dependabot-auto-approve.yml`:
 	- Auto-approves Dependabot PRs into `dev` after successful build checks.
 	- Auto-approves Dependabot PRs into `prod` only for semver `minor`/`patch` updates after successful build checks.
-- `deploy.yml`: on push to any branch, maps branch -> stage/environment and deploys if that environment exists.
+- `deploy.yml`: on push to any branch and on pull requests into `dev`, maps branch -> stage/environment and deploys if that environment exists.
 - `destroy.yml`: manual workflow-dispatch to destroy a branch deployment (requires typing `DESTROY`; rejects `prod`).
 
 Deploy workflows use GitHub Environments:

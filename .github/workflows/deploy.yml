@@ -3,6 +3,8 @@ name: Deploy
 on:
   push:
     branches: ['**']
+  pull_request:
+    branches: [dev]
 
 permissions:
   actions: read
@@ -27,7 +29,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="${GITHUB_REF_NAME}"
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            BRANCH="${{ github.head_ref }}"
+          else
+            BRANCH="${GITHUB_REF_NAME}"
+          fi
           echo "branch_name=$BRANCH" >> "$GITHUB_OUTPUT"
 
           if [[ "$BRANCH" == "prod" ]]; then
