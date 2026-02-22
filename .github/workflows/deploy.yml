@@ -160,7 +160,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [resolve-target, build, detect-infra, terraform]
-    if: needs.resolve-target.outputs.env_exists == 'true' && needs.build.result == 'success' && (needs.terraform.result == 'success' || needs.terraform.result == 'skipped')
+    if: always() && needs.resolve-target.outputs.env_exists == 'true' && needs.build.result == 'success' && (needs.detect-infra.outputs.infra_changed != 'true' || needs.terraform.result == 'success')
     environment:
       name: ${{ needs.resolve-target.outputs.env_name }}
     steps:
