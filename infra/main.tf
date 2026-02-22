@@ -33,6 +33,30 @@ resource "aws_cloudfront_origin_access_control" "site" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_function" "rewrite_pretty_urls" {
+  name    = "${replace(local.site_name, ".", "-")}-rewrite-pretty-urls"
+  runtime = "cloudfront-js-1.0"
+  publish = true
+  comment = "Rewrite pretty URLs to index.html for S3 REST origin"
+  code    = <<-EOT
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  if (uri.endsWith('/')) {
+    request.uri = uri + 'index.html';
+    return request;
+  }
+
+  if (!uri.includes('.')) {
+    request.uri = uri + '/index.html';
+  }
+
+  return request;
+}
+EOT
+}
+
 data "aws_iam_policy_document" "site_cloudfront_read" {
   version = "2012-10-17"
 
@@ -91,6 +115,11 @@ resource "aws_cloudfront_distribution" "site" {
       cookies {
         forward = "none"
       }
+    }
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.rewrite_pretty_urls.arn
     }
   }
 

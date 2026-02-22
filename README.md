@@ -53,6 +53,20 @@ terraform apply plan.tfplan
 - Always review `terraform plan` output before apply.
 - Never commit `.env`, `backend.tfvars`, `env.auto.tfvars`, or `*.tfstate*` files.
 
+## Site deployment (guarded)
+
+To deploy static site content safely (with output checks + CloudFront invalidation):
+
+```bash
+./scripts/deploy-site.sh
+```
+
+This script:
+- Builds `_site`.
+- Fails if non-site repo files appear in `_site`.
+- Syncs `_site` to the Terraform-managed site bucket.
+- Invalidates CloudFront and waits for completion.
+
 ## TODO
 
 - Add a Dependabot configuration to keep `.devcontainer/` and Ruby dependencies up to date.

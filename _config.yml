@@ -32,6 +32,30 @@ theme: minima
 plugins:
   - jekyll-feed
 
+exclude:
+  - .devcontainer
+  - .devcontainer/
+  - .github
+  - .github/
+  - infra
+  - infra/
+  - infra/**
+  - functions
+  - functions/
+  - functions/**
+  - node_modules
+  - node_modules/
+  - vendor
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - build.ps1
+  - serve.ps1
+  - package.json
+  - package-lock.json
+  - serverless.yml
+
 kramdown:
   syntax_highlighter: coderay
   syntax_highlighter_opts:
