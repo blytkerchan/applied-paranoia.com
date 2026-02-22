@@ -138,6 +138,7 @@ jobs:
     if: needs.resolve-target.outputs.env_exists == 'true'
     outputs:
       state_exists: ${{ steps.state.outputs.state_exists }}
+      state_ready: ${{ steps.state.outputs.state_ready }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -153,14 +154,26 @@ jobs:
             --bucket "${{ vars.AWS_STATE_BUCKET }}" \
             --key "${{ needs.resolve-target.outputs.state_key }}" >/dev/null 2>&1; then
             echo "state_exists=true" >> "$GITHUB_OUTPUT"
+
+            STATE_JSON=$(aws s3 cp "s3://${{ vars.AWS_STATE_BUCKET }}/${{ needs.resolve-target.outputs.state_key }}" - 2>/dev/null || true)
+            BUCKET=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.s3_bucket_name.value // empty' 2>/dev/null || true)
+            DIST=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.cloudfront_distribution_id.value // empty' 2>/dev/null || true)
+            SITE=$(printf '%s' "$STATE_JSON" | jq -r '.outputs.site_name.value // empty' 2>/dev/null || true)
+
+            if [[ -n "$BUCKET" && -n "$DIST" && -n "$SITE" ]]; then
+              echo "state_ready=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "state_ready=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "state_exists=false" >> "$GITHUB_OUTPUT"
+            echo "state_ready=false" >> "$GITHUB_OUTPUT"
           fi
 
   terraform:
     runs-on: ubuntu-latest
     needs: [resolve-target, build, detect-infra, check-state]
-    if: needs.resolve-target.outputs.env_exists == 'true' && (needs.detect-infra.outputs.infra_changed == 'true' || needs.check-state.outputs.state_exists != 'true')
+    if: needs.resolve-target.outputs.env_exists == 'true' && (needs.detect-infra.outputs.infra_changed == 'true' || needs.check-state.outputs.state_ready != 'true')
     environment:
       name: ${{ needs.resolve-target.outputs.env_name }}
     steps:
@@ -208,7 +221,7 @@ jobs:
         (
           needs.terraform.result == 'skipped' &&
           needs.detect-infra.outputs.infra_changed != 'true' &&
-          needs.check-state.outputs.state_exists == 'true'
+          needs.check-state.outputs.state_ready == 'true'
         )
       )
     environment:
@@ -324,6 +337,8 @@ jobs:
             echo "- Environment exists: ${{ needs.resolve-target.outputs.env_exists }}"
             echo "- Infra changed: ${{ needs.detect-infra.outputs.infra_changed }}"
             echo "- Terraform result: ${{ needs.terraform.result }}"
+            echo "- State exists: ${{ needs.check-state.outputs.state_exists }}"
+            echo "- State ready: ${{ needs.check-state.outputs.state_ready }}"
             echo "- Has outputs: ${{ steps.outputs.outputs.has_outputs }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
