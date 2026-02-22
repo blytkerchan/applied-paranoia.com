@@ -20,6 +20,7 @@ jobs:
       state_key: ${{ steps.resolve.outputs.state_key }}
       env_exists: ${{ steps.resolve.outputs.env_exists }}
       branch_name: ${{ steps.resolve.outputs.branch_name }}
+      expected_url: ${{ steps.resolve.outputs.expected_url }}
     steps:
       - name: Resolve branch target
         id: resolve
@@ -65,6 +66,13 @@ jobs:
           echo "env_name=$ENV_NAME" >> "$GITHUB_OUTPUT"
           echo "state_key=$STATE_KEY" >> "$GITHUB_OUTPUT"
           echo "env_exists=$ENV_EXISTS" >> "$GITHUB_OUTPUT"
+
+          if [[ "$STAGE" == "prod" ]]; then
+            EXPECTED_URL="https://${{ vars.ROOT_DOMAIN }}"
+          else
+            EXPECTED_URL="https://${STAGE}.${{ vars.ROOT_DOMAIN }}"
+          fi
+          echo "expected_url=$EXPECTED_URL" >> "$GITHUB_OUTPUT"
 
   build:
     runs-on: ubuntu-latest
@@ -225,6 +233,8 @@ jobs:
         run: |
           HAS_OUTPUTS=true
 
+          echo "url=${{ needs.resolve-target.outputs.expected_url }}" >> "$GITHUB_OUTPUT"
+
           terraform init \
             -backend-config="bucket=${{ vars.AWS_STATE_BUCKET }}" \
             -backend-config="key=${{ needs.resolve-target.outputs.state_key }}" \
@@ -243,10 +253,10 @@ jobs:
             HAS_OUTPUTS=false
           fi
 
-          if DOMAIN=$(terraform output -raw full_domain_name 2>/dev/null); then
+          if DOMAIN=$(terraform output -raw site_name 2>/dev/null); then
             echo "url=https://$DOMAIN" >> "$GITHUB_OUTPUT"
           else
-            HAS_OUTPUTS=false
+            true
           fi
 
           echo "has_outputs=$HAS_OUTPUTS" >> "$GITHUB_OUTPUT"
@@ -275,6 +285,7 @@ jobs:
             echo ""
             echo "- Branch: ${{ needs.resolve-target.outputs.branch_name }}"
             echo "- Environment: ${{ needs.resolve-target.outputs.env_name }}"
+            echo "- URL: ${{ steps.outputs.outputs.url }}"
             echo "- Reason: Terraform state has no outputs for this branch target."
           } >> "$GITHUB_STEP_SUMMARY"
 
