@@ -104,7 +104,7 @@ jobs:
           test ! -e _site/serverless.yml
 
       - name: Upload site artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: site
           path: _site
