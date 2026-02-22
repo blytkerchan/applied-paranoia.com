@@ -1,4 +1,9 @@
+
 name: Dependabot Auto-Approve
+
+concurrency:
+  group: dependabot-auto-approve-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 on:
   pull_request_target:

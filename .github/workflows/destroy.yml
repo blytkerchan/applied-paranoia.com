@@ -1,4 +1,9 @@
+
 name: Destroy Deployment
+
+concurrency:
+  group: destroy-${{ github.event.inputs.target_branch || github.ref_name }}
+  cancel-in-progress: true
 
 on:
   workflow_dispatch:
