@@ -1,11 +1,11 @@
 ---
 author: rlc
 comments: true
-date: 2026-02-15
+date: 2026-02-22
 layout: post
 title: Why Post-Quantum Cryptography is important
 ---
-Last Friday someone asked me to explain why post-quantum cryptography is important. Here’s my answer, cleaned up a bit.
+Last Friday (Feb 13), someone asked me to explain why post-quantum cryptography is important. Here’s my answer, cleaned up a bit.
 
 ## The short version: asymmetric cryptography is in trouble
 
