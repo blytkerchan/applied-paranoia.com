@@ -7,8 +7,6 @@ title: Why Post-Quantum Cryptography is important
 ---
 Last Friday someone asked me to explain why post-quantum cryptography is important. Here’s my answer, cleaned up a bit.
 
-**Note:** this is a transcript of a voice recording, edited to become a blog post.
-
 ## The short version: asymmetric cryptography is in trouble
 
 Symmetric cryptography is mostly safe. Asymmetric cryptography is not and the reason comes down to trapdoor functions.
