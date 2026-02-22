@@ -22,7 +22,6 @@ jobs:
       state_key: ${{ steps.resolve.outputs.state_key }}
       env_exists: ${{ steps.resolve.outputs.env_exists }}
       branch_name: ${{ steps.resolve.outputs.branch_name }}
-      expected_url: ${{ steps.resolve.outputs.expected_url }}
     steps:
       - name: Resolve branch target
         id: resolve
@@ -57,7 +56,7 @@ jobs:
               STATE_KEY="${BASE_STATE_KEY}-${BRANCH_SLUG}.tfstate"
             fi
 
-            STAGE_HASH=$(printf '%s' "${GITHUB_REPOSITORY}:${BRANCH}" | sha256sum | cut -c1-10)
+            STAGE_HASH=$(printf '%s' "${GITHUB_REPOSITORY}:${BRANCH}:${GITHUB_RUN_ID}" | sha256sum | cut -c1-10)
             STAGE="dev-${STAGE_HASH}"
           fi
 
@@ -72,13 +71,6 @@ jobs:
           echo "env_name=$ENV_NAME" >> "$GITHUB_OUTPUT"
           echo "state_key=$STATE_KEY" >> "$GITHUB_OUTPUT"
           echo "env_exists=$ENV_EXISTS" >> "$GITHUB_OUTPUT"
-
-          if [[ "$STAGE" == "prod" ]]; then
-            EXPECTED_URL="https://${{ vars.ROOT_DOMAIN }}"
-          else
-            EXPECTED_URL="https://${STAGE}.${{ vars.ROOT_DOMAIN }}"
-          fi
-          echo "expected_url=$EXPECTED_URL" >> "$GITHUB_OUTPUT"
 
   build:
     runs-on: ubuntu-latest
@@ -139,6 +131,8 @@ jobs:
     outputs:
       state_exists: ${{ steps.state.outputs.state_exists }}
       state_ready: ${{ steps.state.outputs.state_ready }}
+      effective_stage: ${{ steps.state.outputs.effective_stage }}
+      expected_url: ${{ steps.state.outputs.expected_url }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -150,6 +144,10 @@ jobs:
       - name: Check Terraform state object
         id: state
         run: |
+          GENERATED_STAGE="${{ needs.resolve-target.outputs.stage }}"
+          EFFECTIVE_STAGE="$GENERATED_STAGE"
+          EXPECTED_URL=""
+
           if aws s3api head-object \
             --bucket "${{ vars.AWS_STATE_BUCKET }}" \
             --key "${{ needs.resolve-target.outputs.state_key }}" >/dev/null 2>&1; then
@@ -162,6 +160,14 @@ jobs:
 
             if [[ -n "$BUCKET" && -n "$DIST" && -n "$SITE" ]]; then
               echo "state_ready=true" >> "$GITHUB_OUTPUT"
+
+              if [[ "$SITE" == "${{ vars.ROOT_DOMAIN }}" ]]; then
+                EFFECTIVE_STAGE="prod"
+              else
+                EFFECTIVE_STAGE="${SITE%.${{ vars.ROOT_DOMAIN }}}"
+              fi
+
+              EXPECTED_URL="https://$SITE"
             else
               echo "state_ready=false" >> "$GITHUB_OUTPUT"
             fi
@@ -169,6 +175,17 @@ jobs:
             echo "state_exists=false" >> "$GITHUB_OUTPUT"
             echo "state_ready=false" >> "$GITHUB_OUTPUT"
           fi
+
+          if [[ -z "$EXPECTED_URL" ]]; then
+            if [[ "$EFFECTIVE_STAGE" == "prod" ]]; then
+              EXPECTED_URL="https://${{ vars.ROOT_DOMAIN }}"
+            else
+              EXPECTED_URL="https://${EFFECTIVE_STAGE}.${{ vars.ROOT_DOMAIN }}"
+            fi
+          fi
+
+          echo "effective_stage=$EFFECTIVE_STAGE" >> "$GITHUB_OUTPUT"
+          echo "expected_url=$EXPECTED_URL" >> "$GITHUB_OUTPUT"
 
   terraform:
     runs-on: ubuntu-latest
@@ -195,7 +212,7 @@ jobs:
         run: |
           cat > ci.auto.tfvars <<EOF
           aws_region = "${{ vars.AWS_REGION }}"
-          stage = "${{ needs.resolve-target.outputs.stage }}"
+          stage = "${{ needs.check-state.outputs.effective_stage }}"
           root_domain = "${{ vars.ROOT_DOMAIN }}"
           acm_certificate_arn = "${{ vars.ACM_CERTIFICATE_ARN }}"
           EOF
@@ -252,7 +269,7 @@ jobs:
         run: |
           HAS_OUTPUTS=true
 
-          echo "url=${{ needs.resolve-target.outputs.expected_url }}" >> "$GITHUB_OUTPUT"
+          echo "url=${{ needs.check-state.outputs.expected_url }}" >> "$GITHUB_OUTPUT"
 
           terraform init \
             -backend-config="bucket=${{ vars.AWS_STATE_BUCKET }}" \
@@ -320,7 +337,7 @@ jobs:
             echo ""
             echo "- Branch: ${{ needs.resolve-target.outputs.branch_name }}"
             echo "- Environment: ${{ needs.resolve-target.outputs.env_name }}"
-            echo "- Stage: ${{ needs.resolve-target.outputs.stage }}"
+            echo "- Stage: ${{ needs.check-state.outputs.effective_stage }}"
             echo "- URL: ${{ steps.outputs.outputs.url }}"
             echo "- Distribution ID: ${{ steps.outputs.outputs.distribution }}"
             echo "- Bucket: ${{ steps.outputs.outputs.bucket }}"
@@ -339,6 +356,7 @@ jobs:
             echo "- Terraform result: ${{ needs.terraform.result }}"
             echo "- State exists: ${{ needs.check-state.outputs.state_exists }}"
             echo "- State ready: ${{ needs.check-state.outputs.state_ready }}"
+            echo "- Effective stage: ${{ needs.check-state.outputs.effective_stage }}"
             echo "- Has outputs: ${{ steps.outputs.outputs.has_outputs }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
