@@ -113,6 +113,10 @@ jobs:
             -backend-config="region=${{ vars.AWS_REGION }}" \
             -reconfigure -upgrade
 
+          if BUCKET_NAME=$(terraform output -raw s3_bucket_name 2>/dev/null); then
+            aws s3 rm "s3://${BUCKET_NAME}" --recursive || true
+          fi
+
           terraform plan -destroy --var-file=ci.auto.tfvars --out=destroy.tfplan
           terraform apply destroy.tfplan
 
