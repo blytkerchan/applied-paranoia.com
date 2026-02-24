@@ -13,7 +13,7 @@
   {%- if site.rss -%}<li><a href="{{ 'feed.xml' | relative_url }}"><svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#rss' | relative_url }}"></use></svg> <span>{{ site.rss | escape }}</span></a></li>{%- endif -%}
  {%- if site.bluesky_username -%}
   <li>
-    <a href="https://bsky.app{{ site.bluesky_username| cgi_escape | escape }}" target="_blank" rel="me">
+    <a href="https://bsky.app/profile/{{ site.bluesky_username| cgi_escape | escape }}" target="_blank" rel="me">
     <svg class="svg-icon"><use xlink:href="{{ '/assets/local-social-icons.svg#bluesky' | relative_url }}"></use></svg> 
       <span class="username">{{ site.bluesky_username }}</span>
     </a>
