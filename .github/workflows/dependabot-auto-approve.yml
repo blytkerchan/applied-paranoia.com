@@ -1,12 +1,18 @@
+
 name: Dependabot Auto-Approve
+
+concurrency:
+  group: dependabot-auto-approve-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
+  actions: read
 
 jobs:
   auto-approve:
@@ -15,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout PR head
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -55,8 +61,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Auto-merge and close on dev
+        if: github.base_ref == 'dev'
+        run: |
+          gh pr merge "${{ github.event.pull_request.number }}" --auto --squash --delete-branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Auto-approve minor/patch on prod
         if: github.base_ref == 'prod' && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
         run: gh pr review "${{ github.event.pull_request.number }}" --approve --body "Auto-approved (minor/patch) after successful build."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge and close minor/patch on prod
+        if: github.base_ref == 'prod' && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
+        run: |
+          gh pr merge "${{ github.event.pull_request.number }}" --auto --squash --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
