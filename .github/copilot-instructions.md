@@ -80,3 +80,113 @@ Required workflow:
 - Run `terraform fmt -recursive` before commit.
 - Run `terraform validate` before creating a PR.
 - Prefer `tflint` for provider-specific linting when available.
+
+---
+
+## Jekyll Blog - Local Development
+
+This is a Jekyll-based cybersecurity blog deployed to AWS via CI/CD pipeline.
+
+### Jekyll Local Development Setup
+
+⚠️ **REQUIRED FIRST STEP**: Bootstrap your Jekyll environment before local development:
+
+```bash
+# On Linux/macOS
+. bootstrap
+
+# On Windows
+.\Bootstrap.ps1
+```
+
+The Jekyll bootstrap script (in repo root):
+1. Checks for required tools (`ruby`, `gem`).
+2. Installs bundler if not present.
+3. Runs `bundle install` to install all dependencies.
+
+After bootstrapping:
+
+```bash
+# Build the site
+./build        # Linux/macOS
+.\build.ps1    # Windows
+
+# Serve locally with live reload (http://localhost:4000)
+./serve        # Linux/macOS
+.\serve.ps1    # Windows
+```
+
+### Jekyll Dependencies and Updates
+
+- Ruby version is specified in `.ruby-version` (currently 3.3.10)
+- Jekyll dependencies are managed via `Gemfile` and `Gemfile.lock`
+- Dependabot automatically creates PRs for dependency updates weekly
+- Dependabot PRs target both `dev` and `prod` branches
+- Auto-approval workflow validates builds before merging
+
+### Deployment and CI/CD
+
+- Deployment target: AWS (S3 + CloudFront)
+- Infrastructure: Terraform (in `infra/`)
+- Branches:
+  - `dev` - Development environment (auto-deploys)
+  - `prod` - Production environment (auto-deploys)
+- GitHub Actions workflows:
+  - `deploy.yml` - Build and deploy to AWS
+  - `destroy.yml` - Tear down infrastructure
+  - `dependabot-auto-approve.yml` - Auto-approve and merge dependency updates
+
+### Jekyll File Conventions
+
+- Blog posts go in `_posts/` using format: `YYYY-MM-DD-title.md`
+- Drafts go in `_drafts/` (not deployed)
+- Static assets go in `assets/`
+- Custom layouts in `_layouts/`, includes in `_includes/`
+- Site configuration in `_config.yml`
+
+### Jekyll Configuration
+
+- Theme: minima
+- Plugins: jekyll-feed
+- Markdown: kramdown
+- Exclude: infra/, functions/, .github/, .devcontainer/, vendor/, node_modules/
+
+### Build Safety Verification
+
+The dependabot auto-approve workflow includes safety checks to ensure sensitive files are never deployed:
+
+```bash
+test ! -e _site/infra
+test ! -e _site/functions
+test ! -e _site/.github
+# ... etc
+```
+
+These checks prevent infrastructure code, secrets, and build artifacts from being published.
+
+### Jekyll Scripts
+
+All scripts have both Bash and PowerShell versions:
+- `bootstrap` / `Bootstrap.ps1` - Set up Jekyll development environment (source on Linux, run on Windows)
+- `build` / `build.ps1` - Build the site to `_site/`
+- `serve` / `serve.ps1` - Serve locally with live reload
+
+Note: Infrastructure bootstrap is separate in `infra/bootstrap` (Terraform setup).
+
+### Branch Strategy
+
+- `dev` - Development/staging environment
+  - Dependabot PRs auto-merge after successful build
+  - Deploy on every push
+- `prod` - Production environment
+  - Dependabot PRs auto-merge only for minor/patch versions
+  - Major version updates require manual review
+  - Deploy on every push
+
+### Important Jekyll Notes
+
+- Test locally before pushing to ensure build succeeds
+- The `vendor/` directory is git-ignored (bundler creates this)
+- `.jekyll-cache/` is git-ignored (Jekyll build cache)
+- Infrastructure and functions directories are excluded from Jekyll build
+- Never commit `Gemfile.lock` changes unless dependencies were intentionally updated
