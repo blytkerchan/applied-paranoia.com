@@ -1,0 +1,3 @@
+About a month ago, Feb 8, I was looking for a JOSE implementation for C++ for a POC I wanted to run for fun. It was a late evening and I was watching Captain Marvel as part of the “homework” my son had given me to re-watch all the Marvel movies before the next big one comes out in December.
+
+I didn’t want to skip too much of the movie, so I thought I’d get a head start by having Copilot write a first draft for me. I’ve been fixing and rewriting that code while watching Marvel movies ever since. 
