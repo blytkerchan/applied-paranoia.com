@@ -2,6 +2,7 @@
 title: 'DNP3 and TLS'
 author: 'rlc'
 date: 2026-04-26
+layout: post
 ---
 
 When I joined the DNP Technical Committee in 2013, the latest version of the DNP3 standard, IEEE 1815, was less than a year old. That version of the standard contained what was then the only viable option for securing SCADA communications over serial connections. As such, DNP3-SAv5 was ahead of its time, despite its warts.
