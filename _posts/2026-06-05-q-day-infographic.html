@@ -4,12 +4,6 @@ author: rlc
 date: 2026-06-05
 layout: post
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Road to CRQC</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap');
 
@@ -33,7 +27,7 @@ layout: post
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
+  .infographic-body {
     background: var(--bg);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
@@ -435,8 +429,7 @@ layout: post
     .stats-row { grid-template-columns: 1fr; }
   }
 </style>
-</head>
-<body>
+<div class="infographic-body">
 <div class="wrapper">
 
   <div class="header">
@@ -722,5 +715,4 @@ layout: post
   });
   obs.observe(consensusEl);
 </script>
-</body>
-</html>
+</div>
