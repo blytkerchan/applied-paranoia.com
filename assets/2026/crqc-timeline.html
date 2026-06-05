@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road to CRQC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #05080f;
+    --surface: #0c1220;
+    --border: #1a2540;
+    --accent: #00d4ff;
+    --warn: #ff6b35;
+    --danger: #ff2d55;
+    --green: #00ff88;
+    --muted: #4a5878;
+    --text: #c8d8f0;
+    --text-dim: #6a7a9a;
+    --ms: #7c5cbf;
+    --ibm: #0062ff;
+    --google: #34a853;
+    --ionq: #ff6b35;
+    --nist: #ffd700;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 60px;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,212,255,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 90% 80%, rgba(124,92,191,0.05) 0%, transparent 60%);
+  }
+
+  .wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #fff;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s forwards;
+  }
+
+  /* RESOURCE STATS BAR */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .stat-card.warn .stat-value { color: var(--warn); }
+  .stat-card.warn::before { background: linear-gradient(90deg, transparent, var(--warn), transparent); }
+  .stat-card.danger .stat-value { color: var(--danger); }
+  .stat-card.danger::before { background: linear-gradient(90deg, transparent, var(--danger), transparent); }
+
+  /* TIMELINE */
+  .timeline-section {
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .timeline-track {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  /* Vertical line */
+  .timeline-track::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom,
+      var(--green) 0%,
+      var(--accent) 25%,
+      var(--accent) 55%,
+      var(--warn) 70%,
+      var(--danger) 85%,
+      rgba(255,45,85,0.2) 100%
+    );
+  }
+
+  .event {
+    position: relative;
+    margin-bottom: 4px;
+    opacity: 0;
+    animation: fadeIn 0.4s forwards;
+  }
+
+  .event-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+
+  .event-inner:hover {
+    border-color: var(--accent);
+    background: #0f1928;
+  }
+
+  /* Dot on timeline */
+  .event::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 18px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 8px var(--accent);
+    z-index: 1;
+  }
+
+  .event.past::before { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .event.near::before { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+  .event.critical::before { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+  .event.milestone::before {
+    width: 13px; height: 13px;
+    left: -28px; top: 16px;
+    background: #fff;
+    box-shadow: 0 0 12px #fff;
+  }
+
+  /* Year label */
+  .year-marker {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 18px 0 8px;
+    color: var(--text-dim);
+    position: relative;
+  }
+
+  .year-marker::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 22px;
+    width: 13px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .event-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .event-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .tag-ms    { background: rgba(124,92,191,0.25); color: #b59fe0; border: 1px solid rgba(124,92,191,0.4); }
+  .tag-ibm   { background: rgba(0,98,255,0.2);   color: #6db3ff; border: 1px solid rgba(0,98,255,0.4); }
+  .tag-google{ background: rgba(52,168,83,0.2);  color: #6fdb96; border: 1px solid rgba(52,168,83,0.4); }
+  .tag-ionq  { background: rgba(255,107,53,0.2); color: #ffaa80; border: 1px solid rgba(255,107,53,0.4); }
+  .tag-nist  { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.35); }
+  .tag-algo  { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .tag-policy{ background: rgba(200,216,240,0.1); color: var(--text-dim); border: 1px solid var(--border); }
+  .tag-quera { background: rgba(255,45,85,0.15); color: #ff8fa3; border: 1px solid rgba(255,45,85,0.3); }
+
+  .event-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 7px;
+    line-height: 1.55;
+  }
+
+  .event-desc strong { color: var(--text); font-weight: 500; }
+
+  /* CRQC threshold zone */
+  .threshold-zone {
+    background: linear-gradient(135deg, rgba(255,45,85,0.06) 0%, rgba(255,107,53,0.06) 100%);
+    border: 1px dashed rgba(255,45,85,0.3);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .threshold-zone .zone-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--danger);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* Expert consensus bar */
+  .consensus {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.2s forwards;
+  }
+
+  .consensus-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .prob-bar-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .prob-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+  }
+
+  .prob-label span:last-child {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+  }
+
+  .prob-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .prob-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* HARVEST NOW */
+  .harvest-banner {
+    background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,45,85,0.08));
+    border: 1px solid rgba(255,107,53,0.35);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-top: 32px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.4s forwards;
+  }
+
+  .harvest-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  .harvest-text {
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .harvest-text strong { color: var(--warn); }
+
+  /* Footer */
+  .footer {
+    margin-top: 32px;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.5s 1.6s forwards;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Staggered event animations */
+  .event:nth-child(1)  { animation-delay: 0.45s; }
+  .event:nth-child(2)  { animation-delay: 0.52s; }
+  .event:nth-child(3)  { animation-delay: 0.59s; }
+  .event:nth-child(4)  { animation-delay: 0.66s; }
+  .event:nth-child(5)  { animation-delay: 0.73s; }
+  .event:nth-child(6)  { animation-delay: 0.80s; }
+  .event:nth-child(7)  { animation-delay: 0.87s; }
+  .event:nth-child(8)  { animation-delay: 0.94s; }
+  .event:nth-child(9)  { animation-delay: 1.01s; }
+  .event:nth-child(10) { animation-delay: 1.08s; }
+  .event:nth-child(11) { animation-delay: 1.15s; }
+
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <div class="eyebrow">Quantum Threat Intelligence · June 2026</div>
+    <h1>Road to <span>CRQC</span></h1>
+    <div class="subtitle">Key milestones toward a Cryptographically Relevant Quantum Computer capable of breaking RSA-2048</div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Logical Qubits Required</div>
+      <div class="stat-value">~1,400</div>
+      <div class="stat-note">Gidney 2025 · RSA-2048 via Shor's</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label">Physical Qubits (revised)</div>
+      <div class="stat-value">&lt;1M</div>
+      <div class="stat-note">Down from 20M (2019 estimate)</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label">ECC-256 (Bitcoin/TLS)</div>
+      <div class="stat-value">&lt;500K</div>
+      <div class="stat-note">Google/Drake/Boneh · March 2026</div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline-section">
+    <div class="section-label">Timeline of Key Events</div>
+    <div class="timeline-track">
+
+      <!-- PAST EVENTS -->
+      <div class="year-marker">2024</div>
+
+      <div class="event past" style="animation-delay:0.45s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">NIST PQC Standards Finalized</div>
+            <div class="tags">
+              <span class="tag tag-nist">NIST</span>
+              <span class="tag tag-policy">Policy</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA) published after 8-year global competition. <strong>The post-quantum migration clock starts officially.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="event past" style="animation-delay:0.52s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">Google Willow: Below-Threshold QEC Demonstrated</div>
+            <div class="tags">
+              <span class="tag tag-google">Google</span>
+              <span class="tag tag-algo">Hardware</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            105-qubit Willow chip proves that adding more physical qubits <strong>actually reduces error rates</strong> — a necessary condition for fault-tolerant scaling. 1 verified logical qubit.
+          </div>
+        </div>
+      </div>
+
+      <div class="year-marker">2025</div>
+
+      <div class="event past" style="animation-delay:0.59s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">Gidney Algorithm: RSA-2048 Cost Collapses</div>
+            <div class="tags">
+              <span class="tag tag-algo">Algorithm</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            New paper cuts physical qubit estimate for breaking RSA-2048 from ~20M to <strong>under 1 million</strong> using magic state cultivation. Single largest downward revision in CRQC resource estimates.
+          </div>
+        </div>
+      </div>
+
+      <div class="event past" style="animation-delay:0.66s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">Microsoft Majorana 1</div>
+            <div class="tags">
+              <span class="tag tag-ms">Microsoft</span>
+              <span class="tag tag-algo">Hardware</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            First topological qubit processor announced. Parity lifetimes of 1–12 ms in Al-based devices. <strong>Topological QEC overhead ~10× lower than surface code.</strong> DARPA selects Microsoft for US2QC final phase.
+          </div>
+        </div>
+      </div>
+
+      <div class="event past" style="animation-delay:0.73s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">IBM Fault-Tolerant Roadmap · Quantinuum 48 LQ</div>
+            <div class="tags">
+              <span class="tag tag-ibm">IBM</span>
+              <span class="tag tag-algo">Quantinuum</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            IBM targets Starling (200 LQ) by 2029 and 1,000+ LQ by early 2030s. Quantinuum Helios achieves <strong>48 verified logical qubits</strong> with ion-trap, best encoding ratio to date.
+          </div>
+        </div>
+      </div>
+
+      <div class="year-marker">2026 · NOW</div>
+
+      <div class="event milestone" style="animation-delay:0.80s">
+        <div class="event-inner" style="border-color: rgba(0,212,255,0.4);">
+          <div class="event-header">
+            <div class="event-title">Microsoft Majorana 2 · 20s Parity Lifetime</div>
+            <div class="tags">
+              <span class="tag tag-ms">Microsoft</span>
+              <span class="tag tag-algo">Hardware</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            InAs–Pb tetron device achieves <strong>~20s parity lifetime</strong> (up from 1–12 ms) — 3+ orders of magnitude improvement. Topological gap doubled to 70 µeV. <em>Characterization only — no gates or algorithms demonstrated.</em> Timeline accelerated to 2029.
+          </div>
+        </div>
+      </div>
+
+      <div class="event past" style="animation-delay:0.87s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">Google/Drake/Boneh: ECC-256 Under 500K Physical Qubits</div>
+            <div class="tags">
+              <span class="tag tag-google">Google</span>
+              <span class="tag tag-algo">Algorithm</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            Breaking Bitcoin/TLS elliptic curve crypto shown to require <strong>fewer than 500,000 physical qubits</strong> in minutes — 20× reduction from Litinski 2023. Threat to ECC now considered nearer than RSA.
+          </div>
+        </div>
+      </div>
+
+      <div class="event past" style="animation-delay:0.94s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">Year of Quantum Security · CNSA 2.0 Compliance Deadline Approaches</div>
+            <div class="tags">
+              <span class="tag tag-nist">NIST</span>
+              <span class="tag tag-policy">Policy</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            Jan 2027: all new US national security systems must be CNSA 2.0-compliant by default. NIST will <strong>deprecate quantum-vulnerable algorithms in 2030</strong>, full removal by 2035. EU mandates PQC deployment starting 2026.
+          </div>
+        </div>
+      </div>
+
+      <!-- NEAR FUTURE -->
+      <div class="year-marker">2027 – 2029</div>
+
+      <div class="event near" style="animation-delay:1.01s">
+        <div class="event-inner">
+          <div class="event-header">
+            <div class="event-title">Expected: First Small Fault-Tolerant Algorithm Runs</div>
+            <div class="tags">
+              <span class="tag tag-ibm">IBM</span>
+              <span class="tag tag-ms">Microsoft</span>
+              <span class="tag tag-algo">Milestone</span>
+            </div>
+          </div>
+          <div class="event-desc">
+            First demonstrations of fault-tolerant quantum algorithms at small scale. IBM Starling (200 LQ), Microsoft topological prototype, IonQ CRQC target for 2028. <strong>Still well below RSA-2048 threshold.</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRQC THRESHOLD ZONE -->
+      <div class="year-marker" style="color: var(--warn)">2029 – 2032 · CRQC RISK WINDOW</div>
+
+      <div class="threshold-zone">
+        <div class="zone-label">⚠ Expert Consensus: Most Probable CRQC Window</div>
+
+        <div class="event critical" style="animation-delay:1.08s; margin-bottom:8px;">
+          <div class="event-inner" style="background: rgba(255,45,85,0.05);">
+            <div class="event-header">
+              <div class="event-title">Earliest Plausible CRQC (Optimistic / IonQ target)</div>
+              <div class="tags">
+                <span class="tag tag-ionq">IonQ</span>
+                <span class="tag tag-algo">~2028–2029</span>
+              </div>
+            </div>
+            <div class="event-desc">
+              Requires all hardware milestones to hit early. IonQ has explicitly targeted CRQC capabilities by 2028. Considered a <strong>best-case scenario</strong> by most experts — low probability, high consequence.
+            </div>
+          </div>
+        </div>
+
+        <div class="event critical" style="animation-delay:1.15s;">
+          <div class="event-inner" style="background: rgba(255,45,85,0.05);">
+            <div class="event-header">
+              <div class="event-title">Median Expert Estimate: Q-Day</div>
+              <div class="tags">
+                <span class="tag tag-algo">Consensus</span>
+                <span class="tag tag-algo">2030–2033</span>
+              </div>
+            </div>
+            <div class="event-desc">
+              Global Risk Institute 2025 survey: <strong>49% of experts</strong> give &gt;50% probability within 10 years. GRI central probability distribution places Q-Day in the <strong>2033–2037 range</strong>. Three 2025–2026 algorithm papers have compressed all prior estimates.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end timeline-track -->
+  </div><!-- end timeline-section -->
+
+  <!-- Expert probability bars -->
+  <div class="consensus">
+    <div class="consensus-title">Global Risk Institute 2025 · Expert Probability of CRQC Within:</div>
+
+    <div class="prob-bar-wrapper">
+      <div class="prob-label"><span>5 years (by 2030)</span><span id="p5">—</span></div>
+      <div class="prob-bar"><div class="prob-fill" id="fill5" style="background: var(--danger); width:0"></div></div>
+    </div>
+    <div class="prob-bar-wrapper">
+      <div class="prob-label"><span>10 years (by 2035)</span><span id="p10">—</span></div>
+      <div class="prob-bar"><div class="prob-fill" id="fill10" style="background: var(--warn); width:0"></div></div>
+    </div>
+    <div class="prob-bar-wrapper" style="margin-bottom:0">
+      <div class="prob-label"><span>15 years (by 2040)</span><span id="p15">—</span></div>
+      <div class="prob-bar"><div class="prob-fill" id="fill15" style="background: var(--accent); width:0"></div></div>
+    </div>
+  </div>
+
+  <!-- Harvest now warning -->
+  <div class="harvest-banner">
+    <div class="harvest-icon">⚡</div>
+    <div class="harvest-text">
+      <strong>Harvest-Now, Decrypt-Later is active today.</strong> Nation-state adversaries are collecting encrypted traffic now to decrypt once a CRQC exists. Any data with a confidentiality lifespan beyond 2030 is already at risk. Migration to NIST PQC standards (ML-KEM, ML-DSA) should be treated as an active security posture, not a future planning item.
+    </div>
+  </div>
+
+  <div class="footer">Sources: GRI Quantum Threat Timeline 2025 · Gidney 2025 · Google/Drake/Boneh 2026 · arXiv:2606.03884 · NIST · IBM Quantum · Microsoft Quantum · IonQ Roadmap</div>
+
+</div>
+
+<script>
+  // Animate probability bars on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const bars = [
+        { fill: 'fill5',  pct: 17,  label: 'p5',  text: '~17%' },
+        { fill: 'fill10', pct: 49,  label: 'p10', text: '~49%' },
+        { fill: 'fill15', pct: 71,  label: 'p15', text: '~71%' },
+      ];
+      bars.forEach(b => {
+        document.getElementById(b.fill).style.width = b.pct + '%';
+        setTimeout(() => {
+          document.getElementById(b.label).textContent = b.text;
+        }, 900);
+      });
+    }, 1300);
+  });
+
+  // IntersectionObserver to re-trigger bar animations if scrolled into view
+  const consensusEl = document.querySelector('.consensus');
+  let triggered = false;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !triggered) {
+        triggered = true;
+        const bars = [
+          { fill: 'fill5',  pct: 17 },
+          { fill: 'fill10', pct: 49 },
+          { fill: 'fill15', pct: 71 },
+        ];
+        bars.forEach(b => {
+          document.getElementById(b.fill).style.width = b.pct + '%';
+        });
+      }
+    });
+  });
+  obs.observe(consensusEl);
+</script>
+</body>
+</html>
