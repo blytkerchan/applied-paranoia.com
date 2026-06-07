@@ -63,6 +63,6 @@ That's one way of saying: we trust each other, we can vouch for what the other p
 
 The other piece, though, is how you look up that data. HTTP and rsync, the two transport mechanisms specified in the RFCs so far, aren't necessarily all that well suited to a distributed trust model. What you really want is a distributed ledger, which is where a blockchain comes in, because that is exactly what a blockchain is. If any one access point goes down, you still have a dozen or so other access points that can serve the same data. That data is built on consensus and can contain the trust information as well.
 
-As it turns out, there is a patent from Huawei that identifies exactly this idea: using a distributed ledger — a blockchain — as a decentralised peer-to-peer network of cryptographically immutable historical records that are signed, hashed, and so on. 
+As it turns out, there is [a patent from Huawei](https://patents.google.com/patent/US12177109B2/en) that identifies exactly this idea: using a distributed ledger — a blockchain — as a decentralised peer-to-peer network of cryptographically immutable historical records that are signed, hashed, and so on. 
 
 Now, I don't have a commercial interest in any of this, so I'm not going to file a patent on the web-of-trust idea. You're welcome. 😉
