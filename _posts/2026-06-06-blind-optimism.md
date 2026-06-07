@@ -2,6 +2,7 @@
 title: Unbridled optimism and friendly handshakes over beer govern the Internet
 author: rlc
 date: 2026-06-06
+layout: post
 ---
 
 A paper in the latest issue of Communications of the ACM took me down a rabbit hole, and I'd like you to come with me.
