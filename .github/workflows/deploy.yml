@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -120,7 +120,7 @@ jobs:
       infra_changed: ${{ steps.filter.outputs.infra }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Filter paths
         id: filter
@@ -201,7 +201,7 @@ jobs:
       name: ${{ needs.resolve-target.outputs.env_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -251,7 +251,7 @@ jobs:
       name: ${{ needs.resolve-target.outputs.env_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download site artifact
         uses: actions/download-artifact@v8
