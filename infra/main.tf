@@ -186,7 +186,7 @@ resource "aws_route53_record" "site_a" {
 module "github_oidc" {
   count = var.stage == "prod" && var.aws_state_bucket != "" ? 1 : 0
 
-  source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=latest"
+  source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=v0.17.0"
 
   roles = {
     site_deploy = {
