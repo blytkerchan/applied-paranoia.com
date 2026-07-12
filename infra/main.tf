@@ -174,11 +174,17 @@ resource "aws_route53_record" "site_a" {
 # with "already exists". One role covers every branch/stage (subject_claims
 # is repo-wide), so only the prod apply needs to own it.
 #
+# Also gated on aws_state_bucket being set: it currently defaults to "" since
+# deploy.yml doesn't pass it yet, and an empty value would produce invalid S3
+# ARNs (arn:aws:s3::: / arn:aws:s3:::/*) in the inline policy below rather
+# than failing clearly. Skipping creation until the var is actually wired up
+# is safer than applying a broken policy.
+#
 # Not yet wired into deploy.yml/destroy.yml - that's a follow-up PR, once
 # this has been applied (with the current static credentials, one last time)
 # and the resulting role ARN is available to set as a repo variable.
 module "github_oidc" {
-  count = var.stage == "prod" ? 1 : 0
+  count = var.stage == "prod" && var.aws_state_bucket != "" ? 1 : 0
 
   source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=latest"
 
