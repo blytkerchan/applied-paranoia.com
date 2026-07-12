@@ -224,10 +224,10 @@ module "github_oidc" {
                 "s3:PutObject", "s3:PutObjectTagging",
                 "s3:DeleteBucketPolicy",
               ]
-              # any stage's site bucket: applied-paranoia.com, dev.applied-paranoia.com, <branch>.applied-paranoia.com, ...
+              # any stage's site bucket: <root_domain>, dev.<root_domain>, <branch>.<root_domain>, ...
               Resource = [
-                "arn:aws:s3:::*applied-paranoia.com",
-                "arn:aws:s3:::*applied-paranoia.com/*",
+                "arn:aws:s3:::*${var.root_domain}",
+                "arn:aws:s3:::*${var.root_domain}/*",
               ]
             },
             {

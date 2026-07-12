@@ -28,6 +28,7 @@ jobs:
       state_key: ${{ steps.resolve.outputs.state_key }}
       env_exists: ${{ steps.resolve.outputs.env_exists }}
       branch_name: ${{ steps.resolve.outputs.branch_name }}
+      deployment_environment: ${{ steps.resolve.outputs.deployment_environment }}
     steps:
       - name: Resolve branch target
         id: resolve
@@ -45,6 +46,7 @@ jobs:
             STAGE="prod"
             ENV_NAME="prod"
             STATE_KEY="${{ vars.AWS_STATE_KEY_PROD }}"
+            DEPLOYMENT_ENVIRONMENT="prod"
           else
             BRANCH_SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')
             if [[ -z "$BRANCH_SLUG" ]]; then
@@ -64,6 +66,7 @@ jobs:
 
             STAGE_HASH=$(printf '%s' "${GITHUB_REPOSITORY}:${BRANCH}:${GITHUB_RUN_ID}" | sha256sum | cut -c1-10)
             STAGE="dev-${STAGE_HASH}"
+            DEPLOYMENT_ENVIRONMENT="dev"
           fi
 
           ENV_URI=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$ENV_NAME")
@@ -77,6 +80,7 @@ jobs:
           echo "env_name=$ENV_NAME" >> "$GITHUB_OUTPUT"
           echo "state_key=$STATE_KEY" >> "$GITHUB_OUTPUT"
           echo "env_exists=$ENV_EXISTS" >> "$GITHUB_OUTPUT"
+          echo "deployment_environment=$DEPLOYMENT_ENVIRONMENT" >> "$GITHUB_OUTPUT"
 
   build:
     runs-on: ubuntu-latest
@@ -221,6 +225,8 @@ jobs:
           stage = "${{ needs.check-state.outputs.effective_stage }}"
           root_domain = "${{ vars.ROOT_DOMAIN }}"
           acm_certificate_arn = "${{ vars.ACM_CERTIFICATE_ARN }}"
+          deployment_environment = "${{ needs.resolve-target.outputs.deployment_environment }}"
+          selected_environment = "${{ needs.resolve-target.outputs.deployment_environment }}"
           EOF
 
           terraform init \

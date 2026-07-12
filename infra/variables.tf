@@ -45,6 +45,11 @@ variable "acm_certificate_arn" {
   description = "ACM certificate ARN in us-east-1 for the CloudFront alias domain. Required for dev/prod (site resources); unused for devops."
   type        = string
   default     = null
+
+  validation {
+    condition     = var.deployment_environment == "devops" || var.acm_certificate_arn != null
+    error_message = "acm_certificate_arn is required when deployment_environment is dev or prod (the CloudFront distribution needs it)."
+  }
 }
 
 variable "aws_state_bucket" {

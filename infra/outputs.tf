@@ -27,3 +27,9 @@ output "site_deploy_role_arn" {
   value       = try(module.github_oidc[0].role_arns["site_deploy"], null)
   sensitive   = false
 }
+
+output "selected_environment" {
+  description = "Confirms which environment bootstrap selected for this run - useful for debugging a state/backend mismatch (also gives selected_environment a real reference so it's not just a validation-only variable, which tflint's unused-declarations check can't otherwise see past)."
+  value       = var.selected_environment
+  sensitive   = false
+}
