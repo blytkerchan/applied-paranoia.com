@@ -21,3 +21,9 @@ output "cloudfront_domain_name" {
   value       = aws_cloudfront_distribution.site.domain_name
   sensitive   = false
 }
+
+output "site_deploy_role_arn" {
+  description = "IAM role ARN for GitHub Actions OIDC deploys. Only set on the state that created it (stage == prod) - other stages' applies will show null here since they don't own the module."
+  value       = var.stage == "prod" ? module.github_oidc[0].role_arns["site_deploy"] : null
+  sensitive   = false
+}

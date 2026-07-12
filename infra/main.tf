@@ -165,3 +165,99 @@ resource "aws_route53_record" "site_a" {
     evaluate_target_health = false
   }
 }
+
+# OIDC deploy role for GitHub Actions, replacing the static AWS_ACCESS_KEY_ID/
+# AWS_SECRET_ACCESS_KEY currently used by deploy.yml/destroy.yml. Gated to the
+# prod stage only: this same main.tf gets applied under multiple state keys
+# (one per branch/stage), and an IAM OIDC provider is account-global - a
+# second, unconditional creation attempt from a non-prod state would fail
+# with "already exists". One role covers every branch/stage (subject_claims
+# is repo-wide), so only the prod apply needs to own it.
+#
+# Not yet wired into deploy.yml/destroy.yml - that's a follow-up PR, once
+# this has been applied (with the current static credentials, one last time)
+# and the resulting role ARN is available to set as a repo variable.
+module "github_oidc" {
+  count = var.stage == "prod" ? 1 : 0
+
+  source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=latest"
+
+  roles = {
+    site_deploy = {
+      role_name      = "applied-paranoia-com-site-deploy"
+      description    = "Deploy applied-paranoia.com (all branches/stages) from GitHub Actions"
+      subject_claims = ["repo:blytkerchan/applied-paranoia.com:*"]
+      inline_policies = {
+        site_management = jsonencode({
+          Version = "2012-10-17"
+          Statement = [
+            {
+              Sid    = "S3SiteManagement"
+              Effect = "Allow"
+              Action = [
+                "s3:CreateBucket", "s3:DeleteBucket", "s3:Get*", "s3:List*",
+                "s3:DeleteObject", "s3:DeleteObjectVersion",
+                "s3:PutBucketPolicy", "s3:PutBucketPublicAccessBlock",
+                "s3:PutBucketTagging", "s3:PutBucketVersioning",
+                "s3:PutObject", "s3:PutObjectTagging",
+                "s3:DeleteBucketPolicy",
+              ]
+              # any stage's site bucket: applied-paranoia.com, dev.applied-paranoia.com, <branch>.applied-paranoia.com, ...
+              Resource = [
+                "arn:aws:s3:::*applied-paranoia.com",
+                "arn:aws:s3:::*applied-paranoia.com/*",
+              ]
+            },
+            {
+              Sid    = "StateReadWrite"
+              Effect = "Allow"
+              Action = [
+                "s3:GetObject", "s3:PutObject", "s3:DeleteObject",
+                "s3:ListBucket", "s3:GetBucketVersioning",
+              ]
+              Resource = [
+                "arn:aws:s3:::${var.aws_state_bucket}",
+                "arn:aws:s3:::${var.aws_state_bucket}/*",
+              ]
+            },
+            {
+              Sid    = "CloudFrontManagement"
+              Effect = "Allow"
+              Action = [
+                "cloudfront:CreateDistribution", "cloudfront:UpdateDistribution",
+                "cloudfront:GetDistribution", "cloudfront:GetDistributionConfig",
+                "cloudfront:DeleteDistribution",
+                "cloudfront:CreateInvalidation", "cloudfront:GetInvalidation",
+                "cloudfront:CreateOriginAccessControl", "cloudfront:GetOriginAccessControl",
+                "cloudfront:UpdateOriginAccessControl", "cloudfront:DeleteOriginAccessControl",
+                "cloudfront:CreateFunction", "cloudfront:UpdateFunction",
+                "cloudfront:DeleteFunction", "cloudfront:DescribeFunction",
+                "cloudfront:GetFunction", "cloudfront:PublishFunction",
+                "cloudfront:TagResource", "cloudfront:ListTagsForResource",
+              ]
+              Resource = "*"
+            },
+            {
+              Sid    = "Route53Management"
+              Effect = "Allow"
+              Action = [
+                "route53:ChangeResourceRecordSets", "route53:GetHostedZone",
+                "route53:GetChange", "route53:ListResourceRecordSets",
+                "route53:ListHostedZonesByName", "route53:ListHostedZones",
+              ]
+              Resource = "*"
+            },
+            {
+              Sid      = "ACMRead"
+              Effect   = "Allow"
+              Action   = ["acm:DescribeCertificate", "acm:ListCertificates"]
+              Resource = "*"
+            },
+          ]
+        })
+      }
+    }
+  }
+
+  tags = { app = "applied-paranoia.com" }
+}

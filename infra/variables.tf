@@ -20,3 +20,9 @@ variable "acm_certificate_arn" {
   description = "ACM certificate ARN in us-east-1 for the CloudFront alias domain."
   type        = string
 }
+
+variable "aws_state_bucket" {
+  description = "S3 bucket holding this repo's terraform state (for scoping the deploy role's state read/write access)."
+  type        = string
+  default     = ""
+}
