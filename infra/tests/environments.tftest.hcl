@@ -1,7 +1,10 @@
 # Unit tests for the environments/bootstrap pattern's core logic - the
 # is_devops/is_app resource split and the variable validations - using
 # Terraform's native mock_provider so no real AWS credentials or network
-# access are needed. Run with: terraform test
+# access are needed. From infra/, run:
+#   terraform init -backend=false   # modules must be installed first; skips
+#                                    # the s3 backend, so no AWS access needed
+#   terraform test
 
 mock_provider "aws" {}
 

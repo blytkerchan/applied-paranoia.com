@@ -231,16 +231,32 @@ module "github_oidc" {
               ]
             },
             {
-              Sid    = "StateReadWrite"
+              # Bucket-level actions can't be scoped to a prefix via Resource
+              # alone (GetBucketVersioning has no object-key concept at all;
+              # ListBucket needs the bucket ARN, so it's scoped to this
+              # repo's state prefix via a condition instead - see the
+              # object-level statement below for the actual read/write scope).
+              Sid    = "StateBucketLevel"
+              Effect = "Allow"
+              Action = [
+                "s3:ListBucket", "s3:GetBucketVersioning",
+              ]
+              Resource = "arn:aws:s3:::${var.aws_state_bucket}"
+              Condition = {
+                StringLike = {
+                  "s3:prefix" = ["applied-paranoia/*"]
+                }
+              }
+            },
+            {
+              Sid    = "StateObjectReadWrite"
               Effect = "Allow"
               Action = [
                 "s3:GetObject", "s3:PutObject", "s3:DeleteObject",
-                "s3:ListBucket", "s3:GetBucketVersioning",
               ]
-              Resource = [
-                "arn:aws:s3:::${var.aws_state_bucket}",
-                "arn:aws:s3:::${var.aws_state_bucket}/*",
-              ]
+              # scoped to this repo's own state prefix, not the whole bucket -
+              # reduces blast radius if the deploy role is ever compromised
+              Resource = "arn:aws:s3:::${var.aws_state_bucket}/applied-paranoia/*"
             },
             {
               Sid    = "CloudFrontManagement"
