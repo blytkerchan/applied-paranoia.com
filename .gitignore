@@ -6,8 +6,7 @@ vendor
 
 # Terraform local artifacts
 infra/.env
-infra/backend.tfvars
-infra/env.auto.tfvars
+infra/selected-environment.auto.tfvars
 infra/*.tfstate
 infra/*.tfstate.*
 infra/.terraform/

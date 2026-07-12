@@ -1,103 +1,152 @@
 #!/usr/bin/env bash
 # Bootstrap the local Terraform environment for applied-paranoia.com.
 #
-# USAGE: source this script — do NOT execute it directly.
-#   . bootstrap
+# USAGE: source this script, optionally naming an environment.
+#   . bootstrap [dev|devops|prod]
+# Defaults to dev if no environment is given.
+#
+# Each environments/<env>/ directory must contain backend.hcl and
+# terraform.tfvars - these are the three pre-populated config files; nothing
+# else needs to be filled in by hand for bootstrap to be deterministic,
+# provided AWS credentials are already active (OIDC-assumed role or a local
+# `aws configure`/`aws sso login` session).
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  echo "ERROR: bootstrap must be sourced, not executed directly."
-  echo "  Usage: . bootstrap"
-  exit 1
-fi
+is_sourced() {
+  [[ "${BASH_SOURCE[0]}" != "$0" ]]
+}
 
-if ! command -v terraform >/dev/null 2>&1; then
-  echo "ERROR: terraform not found. Install it and rerun."
+bail() {
+  echo "bootstrap: $1" >&2
   return 1
-fi
+}
 
-if ! command -v aws >/dev/null 2>&1; then
-  echo "aws CLI not found, installing..."
-  if command -v apt-get >/dev/null 2>&1; then
-    sudo apt-get update -q && sudo apt-get install -y awscli
-  elif command -v brew >/dev/null 2>&1; then
-    brew install awscli
-  else
-    echo "ERROR: Cannot install aws CLI automatically. Please install it manually."
+main() {
+  ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  TF_DIR="$ROOT_DIR"
+  ENVIRONMENTS_DIR="$ROOT_DIR/environments"
+  ENV_FILE="$ROOT_DIR/.env"
+  ENV_TEMPLATE="$ROOT_DIR/dot-env"
+
+  discover_environments() {
+    local candidate env_name
+    for candidate in "$ENVIRONMENTS_DIR"/*; do
+      [[ -d "$candidate" ]] || continue
+      env_name="$(basename "$candidate")"
+      [[ -f "$candidate/backend.hcl" && -f "$candidate/terraform.tfvars" ]] || continue
+      echo "$env_name"
+    done | sort
+  }
+
+  join_by_comma() {
+    local first=true value
+    for value in "$@"; do
+      if [[ "$first" == true ]]; then
+        printf "%s" "$value"
+        first=false
+      else
+        printf ", %s" "$value"
+      fi
+    done
+  }
+
+  AVAILABLE_ENVIRONMENTS=()
+  while IFS= read -r env; do
+    [[ -n "$env" ]] || continue
+    AVAILABLE_ENVIRONMENTS+=("$env")
+  done < <(discover_environments)
+
+  if [[ ${#AVAILABLE_ENVIRONMENTS[@]} -eq 0 ]]; then
+    bail "no valid environments found under $ENVIRONMENTS_DIR (each must include backend.hcl and terraform.tfvars)"
     return 1
   fi
-fi
 
-if [[ ! -f .env ]]; then
-  echo "ERROR: .env file not found."
-  echo "  Copy the template and fill in your values:"
-  echo "    cp dot-env .env"
-  return 1
-fi
+  DEFAULT_ENVIRONMENT="${AVAILABLE_ENVIRONMENTS[0]}"
+  for env in "${AVAILABLE_ENVIRONMENTS[@]}"; do
+    if [[ "$env" == "dev" ]]; then
+      DEFAULT_ENVIRONMENT="dev"
+      break
+    fi
+  done
 
-# shellcheck source=/dev/null
-. .env
+  ENVIRONMENT="${1:-$DEFAULT_ENVIRONMENT}"
+  ENVIRONMENT_VALID=false
+  for env in "${AVAILABLE_ENVIRONMENTS[@]}"; do
+    if [[ "$ENVIRONMENT" == "$env" ]]; then
+      ENVIRONMENT_VALID=true
+      break
+    fi
+  done
 
-required_vars=(
-  AWS_ACCESS_KEY_ID
-  AWS_SECRET_ACCESS_KEY
-  AWS_REGION
-  AWS_STATE_BUCKET
-  AWS_STATE_KEY
-  DEPLOYMENT_STAGE
-  ACM_CERTIFICATE_ARN
-)
-
-for var in "${required_vars[@]}"; do
-  if [[ -z "${!var:-}" ]]; then
-    echo "ERROR: Required variable '$var' is not set in .env."
+  if [[ "$ENVIRONMENT_VALID" != true ]]; then
+    bail "unknown environment '$ENVIRONMENT'. Available: $(join_by_comma "${AVAILABLE_ENVIRONMENTS[@]}")"
     return 1
   fi
-done
 
-aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-aws configure set region "$AWS_REGION"
-aws configure set output json
+  ENV_DIR="$ENVIRONMENTS_DIR/$ENVIRONMENT"
+  BACKEND_CONFIG="$ENV_DIR/backend.hcl"
+  VARS_FILE="$ENV_DIR/terraform.tfvars"
 
-if [[ -n "${AWS_PROFILE:-}" ]]; then
-  aws configure set profile "$AWS_PROFILE"
-fi
+  ensure_aws_auth() {
+    if aws sts get-caller-identity --query Account --output text >/dev/null 2>&1; then
+      return 0
+    fi
 
-if [[ ! -f backend.tfvars ]]; then
-  cat > backend.tfvars << EOF
-bucket       = "$AWS_STATE_BUCKET"
-key          = "$AWS_STATE_KEY"
-region       = "$AWS_REGION"
+    echo "bootstrap: AWS credentials are not active." >&2
+    if [[ -n "${AWS_PROFILE:-}" ]]; then
+      echo "bootstrap: run: aws sso login --profile ${AWS_PROFILE}  (or 'aws configure --profile ${AWS_PROFILE}' for static creds)" >&2
+    else
+      echo "bootstrap: export AWS_PROFILE=<your-profile> before sourcing bootstrap, or run 'aws sso login' / 'aws configure' with the default profile" >&2
+    fi
+
+    bail "aws sts get-caller-identity failed"
+  }
+
+  if ! command -v aws >/dev/null 2>&1; then
+    bail "AWS CLI not found in PATH"
+    return 1
+  fi
+
+  if ! command -v terraform >/dev/null 2>&1; then
+    bail "Terraform not found in PATH"
+    return 1
+  fi
+
+  if [[ -f "$ENV_FILE" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$ENV_FILE"
+    set +a
+  elif [[ -f "$ENV_TEMPLATE" ]]; then
+    echo "bootstrap: no $ENV_FILE found (optional - only needed to set AWS_PROFILE). Continuing without it."
+  fi
+
+  ensure_aws_auth || return 1
+
+  cd "$TF_DIR" || {
+    bail "cannot enter terraform directory: $TF_DIR"
+    return 1
+  }
+
+  if ! terraform init -reconfigure -upgrade -backend-config="$BACKEND_CONFIG"; then
+    bail "terraform init failed - check that the state bucket in $BACKEND_CONFIG exists and the active AWS credentials can reach it"
+    return 1
+  fi
+
+  cat >selected-environment.auto.tfvars <<EOF
+selected_environment = "$ENVIRONMENT"
 EOF
-  echo "Generated backend.tfvars"
+
+  echo
+  echo "Bootstrap complete for environment: $ENVIRONMENT"
+  echo "Next, review a plan for this environment:"
+  echo "  terraform plan -out plan.tfplan -var-file=$VARS_FILE"
+  echo "  terraform apply plan.tfplan   # only after reviewing the plan"
+}
+
+if is_sourced; then
+  main "$@"
+  return $?
 fi
 
-if grep -q '^use_lockfile' backend.tfvars; then
-  sed -i '/^use_lockfile/d' backend.tfvars
-  echo "Updated backend.tfvars: removed unsupported use_lockfile for S3 backend"
-fi
-
-cat > env.auto.tfvars << EOF
-aws_region = "$AWS_REGION"
-stage      = "$DEPLOYMENT_STAGE"
-acm_certificate_arn = "$ACM_CERTIFICATE_ARN"
-EOF
-
-if [[ -n "${ROOT_DOMAIN:-}" ]]; then
-  cat >> env.auto.tfvars << EOF
-root_domain = "$ROOT_DOMAIN"
-EOF
-fi
-
-echo "Generated env.auto.tfvars"
-
-if ! terraform init -backend-config=backend.tfvars -reconfigure -upgrade; then
-  echo ""
-  echo "ERROR: terraform init failed. Fix the issue above and rerun . bootstrap"
-  return 1
-fi
-
-echo ""
-echo "Bootstrap complete. You can now run:"
-echo "  terraform plan --var-file=env.auto.tfvars --out=plan.tfplan"
-echo "  terraform apply plan.tfplan   # only after reviewing the plan"
+echo "bootstrap: run by sourcing it, not executing it directly: . bootstrap [dev|devops|prod]" >&2
+exit 1

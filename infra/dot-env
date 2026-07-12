@@ -1,20 +1,9 @@
-# AWS credentials and region
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=us-east-1
+# Optional. bootstrap works without this file entirely, as long as an AWS
+# session is already active (aws sso login / aws configure / an
+# OIDC-assumed role's exported credentials). Only needed to pin which AWS
+# CLI profile bootstrap and Terraform should use.
+#
+# Copy this file to .env in this directory if you need it: cp dot-env .env
 
 # Optional AWS CLI profile name
-AWS_PROFILE=
-
-# Terraform backend state location
-AWS_STATE_BUCKET=
-AWS_STATE_KEY=applied-paranoia/terraform.tfstate
-
-# Deployment settings
-DEPLOYMENT_STAGE=prod
-
-# Optional Terraform overrides
-ROOT_DOMAIN=applied-paranoia.com
-
-# Required for CloudFront custom domain TLS (must be in us-east-1)
-ACM_CERTIFICATE_ARN=
+# AWS_PROFILE=your-profile
