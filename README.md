@@ -19,33 +19,38 @@ Ruby runtime is pinned in `.ruby-version` and GitHub Actions reads that file via
 
 ## Infrastructure deployment (Terraform)
 
-Infrastructure lives under `infra/` and uses an S3 backend for Terraform state.
+Infrastructure lives under `infra/` and uses an S3 backend for Terraform
+state, with three pre-populated environments (`dev`, `devops`, `prod`) under
+`infra/environments/<env>/{backend.hcl,terraform.tfvars}`. `devops` owns
+account-wide resources (the GitHub Actions OIDC deploy role); `dev`/`prod`
+own the actual site.
 
-1. Create your local environment file from the committed template:
+1. (Optional) Set `AWS_PROFILE` if you need a non-default AWS CLI profile:
 
 ```bash
 cd infra
-cp dot-env .env
+cp dot-env .env   # then edit .env
 ```
 
-2. Edit `.env` with your AWS credentials and deployment values (`ACM_CERTIFICATE_ARN` is required).
+`bootstrap` works without `.env` at all as long as an AWS session is
+already active (`aws sso login`, `aws configure`, or an OIDC-assumed
+role's exported credentials) - no static keys are stored locally anymore.
 
-3. Initialize state storage (required first step):
+2. Bootstrap the environment you want (must be sourced; defaults to `dev`
+   if omitted):
 
 ```bash
-./setup-state
+. bootstrap [dev|devops|prod]
 ```
 
-4. Bootstrap Terraform environment (must be sourced):
+This discovers `environments/<env>/{backend.hcl,terraform.tfvars}`,
+verifies AWS credentials are active, and runs `terraform init`
+deterministically.
+
+3. Plan and apply with manual review:
 
 ```bash
-. bootstrap
-```
-
-5. Plan and apply with manual review:
-
-```bash
-terraform plan --var-file=env.auto.tfvars --out=plan.tfplan
+terraform plan -out plan.tfplan -var-file=environments/<env>/terraform.tfvars
 terraform apply plan.tfplan
 ```
 
@@ -53,7 +58,7 @@ terraform apply plan.tfplan
 
 - Never run `terraform apply --auto-approve`.
 - Always review `terraform plan` output before apply.
-- Never commit `.env`, `backend.tfvars`, `env.auto.tfvars`, or `*.tfstate*` files.
+- Never commit `.env`, `*.auto.tfvars`, or `*.tfstate*` files.
 
 ## Site deployment (guarded)
 

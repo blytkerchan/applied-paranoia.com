@@ -224,10 +224,16 @@ module "github_oidc" {
                 "s3:PutObject", "s3:PutObjectTagging",
                 "s3:DeleteBucketPolicy",
               ]
-              # any stage's site bucket: <root_domain>, dev.<root_domain>, <branch>.<root_domain>, ...
+              # site_name is exactly var.root_domain for prod, or
+              # "<stage>.${var.root_domain}" otherwise (see locals.site_name) -
+              # matching *${var.root_domain} (no dot) would also match an
+              # unrelated bucket like "not-${var.root_domain}", so the apex
+              # and subdomain cases are listed explicitly instead.
               Resource = [
-                "arn:aws:s3:::*${var.root_domain}",
-                "arn:aws:s3:::*${var.root_domain}/*",
+                "arn:aws:s3:::${var.root_domain}",
+                "arn:aws:s3:::${var.root_domain}/*",
+                "arn:aws:s3:::*.${var.root_domain}",
+                "arn:aws:s3:::*.${var.root_domain}/*",
               ]
             },
             {

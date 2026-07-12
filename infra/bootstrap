@@ -127,6 +127,21 @@ main() {
     return 1
   }
 
+  # Terraform auto-loads every *.auto.tfvars file it finds, so a leftover
+  # env.auto.tfvars from the old (pre-environments/) bootstrap flow would
+  # silently override values from environments/<env>/terraform.tfvars -
+  # fail fast rather than risk a non-deterministic run targeting the wrong
+  # stage/domain.
+  if [[ -f "env.auto.tfvars" ]]; then
+    bail "found a leftover env.auto.tfvars from the old bootstrap flow - it would silently override environments/${ENVIRONMENT}/terraform.tfvars. Remove it (rm env.auto.tfvars) and re-run bootstrap."
+    return 1
+  fi
+
+  if [[ -f "backend.tfvars" ]]; then
+    bail "found a leftover backend.tfvars from the old bootstrap flow - the environments/${ENVIRONMENT}/backend.hcl file replaces it. Remove it (rm backend.tfvars) and re-run bootstrap."
+    return 1
+  fi
+
   if ! terraform init -reconfigure -upgrade -backend-config="$BACKEND_CONFIG"; then
     bail "terraform init failed - check that the state bucket in $BACKEND_CONFIG exists and the active AWS credentials can reach it"
     return 1
