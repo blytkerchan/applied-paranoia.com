@@ -292,6 +292,7 @@ module "github_oidc" {
                 "route53:ChangeResourceRecordSets", "route53:GetHostedZone",
                 "route53:GetChange", "route53:ListResourceRecordSets",
                 "route53:ListHostedZonesByName", "route53:ListHostedZones",
+                "route53:ListTagsForResource",
               ]
               Resource = "*"
             },
