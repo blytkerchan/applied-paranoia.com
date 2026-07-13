@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.7.0" # mock_provider (tests/*.tftest.hcl) requires 1.7+
+  required_version = ">= 1.9.0" # cross-variable references in validation blocks require 1.9+
 
   backend "s3" {}
 
