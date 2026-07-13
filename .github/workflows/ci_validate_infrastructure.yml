@@ -1,0 +1,116 @@
+name: ci_validate_infrastructure
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+      - prod
+
+permissions:
+  contents: read
+
+env:
+  TFLINT_VERSION: "0.55.1"
+  TRIVY_VERSION: "0.70.0"
+  CHECKOV_VERSION: "3.2.525"
+  # CKV_TF_1 - module source uses a tag (v0.17.0), not a commit hash. Skipped
+  # for the same reason vln-devsecops/github-runners skips it: pinning to an
+  # immutable release tag (per terraform-modules' own tagging policy) is the
+  # portfolio-wide convention, not an oversight.
+  CHECKOV_SKIP_CHECKS: "CKV_TF_1"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.15.8
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive
+
+      - name: Validate Terraform configuration
+        run: |
+          set -euo pipefail
+          terraform init -backend=false
+          terraform validate
+
+      - name: Run terraform test (mocked provider, no AWS credentials needed)
+        run: terraform test
+
+  tflint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup tflint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v${{ env.TFLINT_VERSION }}
+
+      - name: Run tflint
+        run: |
+          tflint --init
+          tflint --recursive
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Trivy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${HOME}/.local/bin"
+          curl -fsSL -o /tmp/trivy.tar.gz \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          tar -xzf /tmp/trivy.tar.gz -C "${HOME}/.local/bin" trivy
+          chmod +x "${HOME}/.local/bin/trivy"
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+      # Non-blocking: findings here are enterprise-hardening trade-offs for a
+      # personal-scale static site (CloudFront WAF/logging/geo-restriction,
+      # S3 versioning/replication), not bugs - tracked in an issue rather
+      # than fixed blind. Findings still surface in the log.
+      - name: Run Trivy (terraform misconfig scan)
+        working-directory: infra
+        continue-on-error: true
+        run: |
+          trivy fs --exit-code 1 --scanners misconfig \
+            --severity HIGH,CRITICAL .
+
+  checkov:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Checkov
+        run: pip install checkov=="${CHECKOV_VERSION}"
+
+      # Non-blocking for the same reason as the Trivy step above.
+      - name: Run Checkov (terraform)
+        working-directory: infra
+        continue-on-error: true
+        run: |
+          checkov -d . \
+            --framework terraform \
+            --skip-check "${CHECKOV_SKIP_CHECKS}" \
+            --compact \
+            --quiet
