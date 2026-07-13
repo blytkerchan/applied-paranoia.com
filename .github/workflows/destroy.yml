@@ -21,6 +21,7 @@ on:
 permissions:
   actions: read
   contents: read
+  id-token: write
 
 jobs:
   resolve-target:
@@ -32,6 +33,7 @@ jobs:
       env_exists: ${{ steps.resolve.outputs.env_exists }}
       target_branch: ${{ steps.resolve.outputs.target_branch }}
       destroy_allowed: ${{ steps.resolve.outputs.destroy_allowed }}
+      deployment_environment: ${{ steps.resolve.outputs.deployment_environment }}
     steps:
       - name: Resolve destroy target
         id: resolve
@@ -48,6 +50,7 @@ jobs:
             echo "env_name=prod" >> "$GITHUB_OUTPUT"
             echo "stage=prod" >> "$GITHUB_OUTPUT"
             echo "state_key=${{ vars.AWS_STATE_KEY_PROD }}" >> "$GITHUB_OUTPUT"
+            echo "deployment_environment=prod" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -81,6 +84,7 @@ jobs:
           echo "env_name=$ENV_NAME" >> "$GITHUB_OUTPUT"
           echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
           echo "state_key=$STATE_KEY" >> "$GITHUB_OUTPUT"
+          echo "deployment_environment=dev" >> "$GITHUB_OUTPUT"
 
   destroy:
     if: github.event.inputs.confirm_destroy == 'DESTROY' && needs.resolve-target.outputs.destroy_allowed == 'true' && needs.resolve-target.outputs.env_exists == 'true'
@@ -90,13 +94,12 @@ jobs:
       name: ${{ needs.resolve-target.outputs.env_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.SITE_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
@@ -110,6 +113,8 @@ jobs:
           stage = "${{ needs.resolve-target.outputs.stage }}"
           root_domain = "${{ vars.ROOT_DOMAIN }}"
           acm_certificate_arn = "${{ vars.ACM_CERTIFICATE_ARN }}"
+          deployment_environment = "${{ needs.resolve-target.outputs.deployment_environment }}"
+          selected_environment = "${{ needs.resolve-target.outputs.deployment_environment }}"
           EOF
 
           terraform init \

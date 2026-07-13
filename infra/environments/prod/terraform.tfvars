@@ -1,0 +1,5 @@
+deployment_environment = "prod"
+stage                  = "prod"
+aws_region             = "us-east-1"
+root_domain            = "applied-paranoia.com"
+acm_certificate_arn    = "arn:aws:acm:us-east-1:981855120431:certificate/58d98960-42ee-47de-81de-d36623c86a8a"
