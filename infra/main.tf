@@ -204,6 +204,10 @@ module "github_oidc" {
 
   source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=v0.17.0"
 
+  # The GitHub Actions OIDC provider is account-global; another state already
+  # owns it. Skip creation and attach roles to the existing provider instead.
+  create_oidc_provider = false
+
   roles = {
     site_deploy = {
       role_name      = "applied-paranoia-com-site-deploy"
