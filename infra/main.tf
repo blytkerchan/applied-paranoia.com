@@ -9,9 +9,17 @@ data "aws_route53_zone" "root" {
   private_zone = false
 }
 
+# trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket" "site" {
   count = local.is_app ? 1 : 0
 
+  # checkov:skip=CKV_AWS_145:SSE-S3 sufficient for public static content; KMS adds cost/complexity not justified here
+  # checkov:skip=CKV_AWS_18:Access logging requires a separate log bucket; cost not justified for a personal site
+  # checkov:skip=CKV_AWS_144:Cross-region replication not cost-justified for a personal blog
+  # checkov:skip=CKV_AWS_21:Site content is managed via git; S3 versioning adds cost with no benefit
+  # checkov:skip=CKV2_AWS_61:No versioning configured; lifecycle management not applicable
+  # checkov:skip=CKV2_AWS_62:Event notifications not needed for a static site
+  # checkov:skip=CKV2_AWS_6:Public access blocked via aws_s3_bucket_public_access_block; count-based resource causes false positive
   bucket        = local.site_name
   force_destroy = false
 
@@ -98,9 +106,16 @@ resource "aws_s3_bucket_policy" "site" {
   policy = data.aws_iam_policy_document.site_cloudfront_read[0].json
 }
 
+# trivy:ignore:AVD-AWS-0011
 resource "aws_cloudfront_distribution" "site" {
   count = local.is_app ? 1 : 0
 
+  # checkov:skip=CKV_AWS_68:WAF cost (~$5/month + per-request fees) not justified for a personal static site
+  # checkov:skip=CKV2_AWS_47:Requires WAF which is not cost-justified
+  # checkov:skip=CKV_AWS_310:Origin failover adds a second bucket + complexity; single-origin is fine for a personal blog
+  # checkov:skip=CKV_AWS_86:Access logging requires a separate log bucket; cost not justified for a personal site
+  # checkov:skip=CKV_AWS_374:Public blog - content is intentionally accessible worldwide; geo restriction would block legitimate readers
+  # checkov:skip=CKV2_AWS_32:Response headers policy not required for a static site with no sensitive data
   enabled             = true
   aliases             = [local.site_name]
   default_root_object = "index.html"
