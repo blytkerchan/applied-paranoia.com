@@ -14,6 +14,7 @@ on:
 permissions:
   actions: read
   contents: read
+  id-token: write
   pull-requests: read
 
 env:
@@ -147,8 +148,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.SITE_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Check Terraform state object
@@ -210,8 +210,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.SITE_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
@@ -268,8 +267,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.SITE_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
