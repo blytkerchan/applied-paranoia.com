@@ -45,9 +45,23 @@ updates:
       - "github-actions"
     # assignees and reviewers omitted
 
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+    # assignees and reviewers omitted
 
   - package-ecosystem: "docker"
     directory: "/.devcontainer"
+    target-branch: "prod"
     schedule:
       interval: "weekly"
     commit-message:
@@ -56,12 +70,12 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "github-actions"
+      - "docker"
     # assignees and reviewers omitted
-
 
   - package-ecosystem: "terraform"
     directory: "/infra"
+    target-branch: "dev"
     schedule:
       interval: "weekly"
     commit-message:
@@ -70,5 +84,19 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "github-actions"
+      - "terraform"
+    # assignees and reviewers omitted
+
+  - package-ecosystem: "terraform"
+    directory: "/infra"
+    target-branch: "prod"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "terraform"
     # assignees and reviewers omitted
