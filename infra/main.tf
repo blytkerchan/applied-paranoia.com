@@ -217,7 +217,7 @@ resource "aws_route53_record" "site_a" {
 module "github_oidc" {
   count = local.is_devops && var.aws_state_bucket != "" ? 1 : 0
 
-  source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=v0.19.1"
+  source = "git::https://github.com/vln-devsecops/terraform-modules.git//modules/aws/github_oidc?ref=v1.1"
 
   # The GitHub Actions OIDC provider is account-global; another state already
   # owns it. Skip creation and attach roles to the existing provider instead.
