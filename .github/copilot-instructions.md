@@ -128,7 +128,7 @@ After bootstrapping:
 
 ### Jekyll Dependencies and Updates
 
-- Ruby version is specified in `.ruby-version` (currently 3.3.10)
+- Ruby version is specified in `.ruby-version` (currently 3.3, latest patch)
 - Jekyll dependencies are managed via `Gemfile` and `Gemfile.lock`
 - Dependabot automatically creates PRs for dependency updates weekly
 - Dependabot PRs target both `dev` and `prod` branches
